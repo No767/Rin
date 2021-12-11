@@ -1,4 +1,4 @@
-FROM python:3.10.0
+FROM python:3.10.0b4
 WORKDIR /Bot
 COPY Pipfile ./ /Bot/
 COPY Pipfile.lock ./ /Bot/
