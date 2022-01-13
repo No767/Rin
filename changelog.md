@@ -1,2 +1,2 @@
 # Changes
-- Limit the amount of users returned to 10 (looping through approx 150 of them was way too much...)
+- Fix Major Security Vulnerability with Pillow (8.4.0 --> 9.0.0)
