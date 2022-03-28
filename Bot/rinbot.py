@@ -13,12 +13,9 @@ bot = commands.Bot(command_prefix=".", help_command=None)
 # Loads in all extensions
 initial_extensions = [
     "Cogs.rininfo",
-    "Cogs.plugin_tools",
     "Cogs.rinping",
-    "Cogs.valid",
     "Cogs.rinhelp",
     "Cogs.reddit",
-    "Cogs.server-info",
     "Cogs.mcsrvstats",
     "Cogs.waifu-generator",
     "Cogs.hypixel",
@@ -27,20 +24,23 @@ initial_extensions = [
     "Cogs.qrcode",
     "Cogs.spiget",
     "Cogs.jikan",
-    "Cogs.nb-pride",
     "Cogs.top-gg",
     "Cogs.global-error-handling",
     "Cogs.rininvite",
     "Cogs.version",
-    "Cogs.clear",
     "Cogs.twitter",
     "Cogs.youtube",
     "Cogs.jisho",
     "Cogs.tenor",
     "Cogs.uptime",
     "Cogs.mangadex",
+    "Cogs.bot-info",
+    "Cogs.openai-gpt3",
+    "Cogs.help",
+    "Cogs.modrinth",
+    "Cogs.discord-bots",
+    "Cogs.first-frc-events",
     "Cogs.deviantart",
-    "Cogs.disquest",
 ]
 for extension in initial_extensions:
     bot.load_extension(extension)
@@ -49,7 +49,7 @@ for extension in initial_extensions:
 # Adds in the bot presence
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=".rinhelp"))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="/rinhelp"))
 
 # Run the bot
 bot.run(TOKEN)
