@@ -104,12 +104,12 @@ class TenorV2(commands.Cog):
                     embedVar1.set_image(
                         url=dataMain2["results"][0]["media"][0]["gif"]["url"]
                     )
-                    await ctx.send(embed=embedVar1)
+                    await ctx.respond(embed=embedVar1)
                 except Exception as e:
                     embedVar = discord.Embed()
                     embedVar.description = f"Sorry, but the search for {search_one_term} has failed. Please try again..."
                     embedVar.add_field(name="Reason", value=e, inline=True)
-                    await ctx.send(embed=embedVar)
+                    await ctx.respond(embed=embedVar)
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -201,12 +201,12 @@ class TenorV4(commands.Cog):
                     embedVar.description = str(
                         [items for items in dataMain5["results"]]
                     ).replace("'", "")
-                    await ctx.send(embed=embedVar)
+                    await ctx.respond(embed=embedVar)
                 except Exception as e:
                     embedVar = discord.Embed()
                     embedVar.description = "Sorry, but the search for {search} has failed. Please try again..."
                     embedVar.add_field(name="Reason", value=e, inline=True)
-                    await ctx.send(embed=embedVar)
+                    await ctx.respond(embed=embedVar)
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -353,5 +353,5 @@ def setup(bot):
     bot.add_cog(TenorV3(bot))
     bot.add_cog(TenorV4(bot))
     bot.add_cog(TenorV5(bot))
-    bot.add_cog(TenorV6(bot))
+    # bot.add_cog(TenorV6(bot))
     bot.add_cog(TenorV7(bot))

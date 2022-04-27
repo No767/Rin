@@ -165,12 +165,12 @@ class MangaDexV2(commands.Cog):
                         for k, v in dataMain2["data"]["attributes"].items():
                             if k not in mangaFilter2:
                                 embedVar.add_field(
-                                    name=k, value=v, inline=True)
+                                    name=k, value=f"[{v}]", inline=True)
                         for keys, value in dataMain2["data"]["attributes"][
                             "links"
                         ].items():
                             embedVar.add_field(
-                                name=keys, value=value, inline=True)
+                                name=keys, value=f"[{value}]", inline=True)
                         for tagItem in dataMain2["data"]["attributes"]["tags"]:
                             mainTags = [
                                 v["name"]["en"]
@@ -468,6 +468,6 @@ def setup(bot):
     bot.add_cog(MangaDexV1(bot))
     bot.add_cog(MangaDexV2(bot))
     bot.add_cog(MangaDexV3(bot))
-    bot.add_cog(MangaDexV4(bot))
-    bot.add_cog(MangaDexV5(bot))
-    bot.add_cog(MangaDexV6(bot))
+    # bot.add_cog(MangaDexV4(bot))
+    # bot.add_cog(MangaDexV5(bot))
+    # bot.add_cog(MangaDexV6(bot)) # Broken, and will fix later

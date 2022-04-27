@@ -431,6 +431,6 @@ def setup(bot):
     # bot.add_cog(ModrinthV3(bot)) # Disabled due to spam issues
     bot.add_cog(ModrinthV4(bot))
     bot.add_cog(ModrinthV5(bot))
-    bot.add_cog(ModrinthV6(bot))
+    # bot.add_cog(ModrinthV6(bot))
     bot.add_cog(ModrinthV7(bot))
     bot.add_cog(ModrinthV8(bot))

@@ -35,8 +35,7 @@ class hypixel_api(commands.Cog):
                 try:
                     if str(playerMain["success"]) == "True":
                         discord_embed = discord.Embed(
-                            title="Player Info",
-                            color=discord.Color.from_rgb(186, 244, 255),
+                            color=discord.Color.from_rgb(186, 244, 255)
                         )
                         filterMainV3 = [
                             "achievements",
@@ -58,12 +57,14 @@ class hypixel_api(commands.Cog):
                             "adventRewards2020",
                             "achievementRewardsNew",
                             "adsense_tokens",
+                            "displayname"
                         ]
                         for key, value in playerMain["player"].items():
                             if key not in filterMainV3:
                                 discord_embed.add_field(
                                     name=key, value=value, inline=True
                                 )
+                        discord_embed.title = playerMain["player"]["displayname"]
                         await ctx.respond(embed=discord_embed)
                     else:
                         embedVar = discord.Embed()

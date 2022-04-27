@@ -17,7 +17,7 @@ class jishoDict(commands.Cog):
 
     @slash_command(
         name="jisho",
-        description="Searches for words on Jisho",
+        description="Searches for words on Jisho (This will search for all of the related words. May cause spam)",
     )
     async def jishoSearcher(
         self,

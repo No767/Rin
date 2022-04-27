@@ -319,9 +319,9 @@ class RedditV7(commands.Cog):
 
 def setup(bot):
     bot.add_cog(RedditV1(bot))
-    bot.add_cog(RedditV2(bot))
-    bot.add_cog(RedditV3(bot))
-    bot.add_cog(RedditV4(bot))
-    bot.add_cog(RedditV5(bot))
-    bot.add_cog(RedditV6(bot))
-    bot.add_cog(RedditV7(bot))
+    # bot.add_cog(RedditV2(bot))
+    # bot.add_cog(RedditV3(bot))
+    # bot.add_cog(RedditV4(bot))
+    # bot.add_cog(RedditV5(bot))
+    # bot.add_cog(RedditV6(bot))
+    # bot.add_cog(RedditV7(bot))

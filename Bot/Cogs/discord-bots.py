@@ -56,15 +56,12 @@ class DiscordBotsV1(commands.Cog):
                             if k not in filterMain:
                                 embedVar.add_field(
                                     name=k, value=v, inline=True)
-                        for keys, value in dictItem["owner"].items():
-                            embedVar.add_field(
-                                name=keys, value=value, inline=True)
+                                embedVar.remove_field(-18)
                         embedVar.title = dictItem["username"]
                         embedVar.description = dictItem["shortDescription"]
                         embedVar.set_thumbnail(url=dictItem["avatarURL"])
                         await ctx.respond(embed=embedVar)
                 except Exception as e:
-                    print(dataMain)
                     embedError = discord.Embed()
                     embedError.description = (
                         "It seems like it didn't work... Please try again"

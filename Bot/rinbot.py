@@ -28,19 +28,16 @@ initial_extensions = [
     "Cogs.global-error-handling",
     "Cogs.rininvite",
     "Cogs.version",
-    "Cogs.twitter",
     "Cogs.youtube",
     "Cogs.jisho",
     "Cogs.tenor",
     "Cogs.uptime",
     "Cogs.mangadex",
     "Cogs.bot-info",
-    "Cogs.openai-gpt3",
     "Cogs.help",
     "Cogs.modrinth",
     "Cogs.discord-bots",
-    "Cogs.first-frc-events",
-    "Cogs.blue-alliance"
+    "Cogs.first-frc-events"
 ]
 for extension in initial_extensions:
     bot.load_extension(extension)
