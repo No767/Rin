@@ -17,11 +17,11 @@ class JikanV1(commands.Cog):
 
     @slash_command(
         name="jikan-anime",
-        description="Fetches up to 5 anime from MAL",
+        description="Fetches up to 3 anime from MAL",
     )
     async def anime(self, ctx, *, anime_name: Option(str, "Name of the anime")):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            params = {"limit": 5, "q": anime_name,
+            params = {"limit": 3, "q": anime_name,
                       "sfw": "true", "order_by": "title"}
             async with session.get(
                 "https://api.jikan.moe/v4/anime/", params=params
@@ -95,11 +95,11 @@ class JikanV2(commands.Cog):
 
     @slash_command(
         name="jikan-manga",
-        description="Fetches up to 5 mangas from MAL",
+        description="Fetches up to 3 mangas from MAL",
     )
     async def manga(self, ctx, *, manga_name: Option(str, "Name of the manga")):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            params = {"limit": 5, "q": manga_name,
+            params = {"limit": 3, "q": manga_name,
                       "sfw": "true", "order_by": "title"}
             async with session.get(
                 "https://api.jikan.moe/v4/manga", params=params
@@ -433,8 +433,8 @@ class JikanV7(commands.Cog):
 def setup(bot):
     bot.add_cog(JikanV1(bot))
     bot.add_cog(JikanV2(bot))
-    bot.add_cog(JikanV3(bot))
-    bot.add_cog(JikanV4(bot))
+    # bot.add_cog(JikanV3(bot))
+    # bot.add_cog(JikanV4(bot))
     # bot.add_cog(JikanV5(bot)) # Disabled due to spam issues...
     # bot.add_cog(JikanV6(bot))
     bot.add_cog(JikanV7(bot))

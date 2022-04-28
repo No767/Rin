@@ -25,21 +25,16 @@ class rinhelp(commands.Cog):
             "The different categories of services that Rin offers",
             choices=[
                 "Anime",
-                "DeviantArt",
                 "Discord.bots.gg",
-                "First-FRC",
                 "Fun",
                 "Hypixel",
                 "Minecraft",
                 "Misc",
                 "Modrinth",
                 "MyAnimeList",
-                "OpenAI",
                 "Reddit",
-                "Spigot",
                 "Tenor",
                 "Top.gg",
-                "Twitter",
                 "YouTube",
             ],
             required=False,
@@ -52,15 +47,15 @@ class rinhelp(commands.Cog):
                 view = discord.ui.View(timeout=None)
                 embedVar.add_field(
                     name="Anime", value="`/rinhelp anime`", inline=True)
-                embedVar.add_field(
-                    name="DeviantArt", value="`/rinhelp da`", inline=True
-                )
+                # embedVar.add_field(
+                    # name="DeviantArt", value="`/rinhelp da`", inline=True
+                # )
                 embedVar.add_field(
                     name="Discord.bots.gg", value="`/rinhelp dbg`", inline=True
                 )
-                embedVar.add_field(
-                    name="First-FRC", value="`/rinhelp first-frc`", inline=True
-                )
+                # embedVar.add_field(
+                    # name="First-FRC", value="`/rinhelp first-frc`", inline=True
+                # )
                 embedVar.add_field(
                     name="Fun", value="`/rinhelp fun`", inline=True)
                 embedVar.add_field(
@@ -76,22 +71,22 @@ class rinhelp(commands.Cog):
                 embedVar.add_field(
                     name="MyAnimeList", value="`/rinhelp mal`", inline=True
                 )
-                embedVar.add_field(
-                    name="OpenAI", value="`/rinhelp openai`", inline=True
-                )
+                # embedVar.add_field(
+                    # name="OpenAI", value="`/rinhelp openai`", inline=True
+                # )
                 embedVar.add_field(
                     name="Reddit", value="`/rinhelp reddit`", inline=True
                 )
-                embedVar.add_field(
-                    name="Spigot", value="`/rinhelp spigot`", inline=True
-                )
+                # embedVar.add_field(
+                    # name="Spigot", value="`/rinhelp spigot`", inline=True
+                # )
                 embedVar.add_field(
                     name="Tenor", value="`/rinhelp tenor`", inline=True)
                 embedVar.add_field(
                     name="Top.gg", value="`/rinhelp topgg`", inline=True)
-                embedVar.add_field(
-                    name="Twitter", value="`/rinhelp twitter`", inline=True
-                )
+                # embedVar.add_field(
+                    # name="Twitter", value="`/rinhelp twitter`", inline=True
+                # )
                 embedVar.add_field(
                     name="YouTube", value="`/rinhelp yt`", inline=True)
                 embedVar.set_author(
@@ -141,71 +136,71 @@ class rinhelp(commands.Cog):
                 )
                 await ctx.respond(embed=embedVar)
 
-            if category in ["First-FRC", "ffrc", "first-frc"]:
-                bot = self.bot
-                embedVar = discord.Embed(color=14414079)
-                embedVar.add_field(
-                    name="`frc-season`",
-                    value="Returns a season summary for the current FRC season",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`frc-events`",
-                    value="Lists out the events for the current FRC season",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`frc-team-awards`",
-                    value="Returns the awards that a FRC team has won",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`frc-score`",
-                    value="Returns the FRC team's score details for a given event",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`frc-results`",
-                    value="Returns the FRC team's results for a given event",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`frc-event-rankings-top`",
-                    value="Returns the top 10 FRC teams for a given event",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`frc-event-schedule`",
-                    value="Returns the schedule for a given event",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`frc-event-alliances`",
-                    value="Returns the alliances for a given event",
-                    inline=True,
-                )
-                embedVar.set_author(
-                    name="Rin Help - First FRC", icon_url=bot.user.display_avatar
-                )
-                await ctx.respond(embed=embedVar)
+            # if category in ["First-FRC", "ffrc", "first-frc"]:
+                # bot = self.bot
+                # embedVar = discord.Embed(color=14414079)
+                # embedVar.add_field(
+                    # name="`frc-season`",
+                    # value="Returns a season summary for the current FRC season",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`frc-events`",
+                    # value="Lists out the events for the current FRC season",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`frc-team-awards`",
+                    # value="Returns the awards that a FRC team has won",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`frc-score`",
+                    # value="Returns the FRC team's score details for a given event",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`frc-results`",
+                    # value="Returns the FRC team's results for a given event",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`frc-event-rankings-top`",
+                    # value="Returns the top 10 FRC teams for a given event",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`frc-event-schedule`",
+                    # value="Returns the schedule for a given event",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`frc-event-alliances`",
+                    # value="Returns the alliances for a given event",
+                    # inline=True,
+                # )
+                # embedVar.set_author(
+                    # name="Rin Help - First FRC", icon_url=bot.user.display_avatar
+                # )
+                # await ctx.respond(embed=embedVar)
 
-            if category in ["twitter", "Twitter"]:
-                bot = self.bot
-                embedVar = discord.Embed(color=14414079)
-                embedVar.add_field(
-                    name="`twitter-search`",
-                    value="Grabs 5 most recent tweets from the specified user",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`twitter-user`",
-                    value="Grabs info about the specified user",
-                    inline=True,
-                )
-                embedVar.set_author(
-                    name="Rin Help - Twitter", icon_url=bot.user.display_avatar
-                )
-                await ctx.respond(embed=embedVar)
+            # if category in ["twitter", "Twitter"]:
+                # bot = self.bot
+                # embedVar = discord.Embed(color=14414079)
+                # embedVar.add_field(
+                    # name="`twitter-search`",
+                    # value="Grabs 5 most recent tweets from the specified user",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`twitter-user`",
+                    # value="Grabs info about the specified user",
+                    # inline=True,
+                # )
+                # embedVar.set_author(
+                    # name="Rin Help - Twitter", icon_url=bot.user.display_avatar
+                # )
+                # await ctx.respond(embed=embedVar)
 
             if category in ["reddit", "Reddit"]:
                 bot = self.bot
@@ -213,36 +208,36 @@ class rinhelp(commands.Cog):
                 embedVar.add_field(
                     name="`reddit`", value="searches on reddit", inline=True
                 )
-                embedVar.add_field(
-                    name="`reddit-new`",
-                    value="Returns 5 new posts from any subreddit",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`reddit-top`",
-                    value="Returns 5 top posts from any subreddit",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`reddit-hot`",
-                    value="Returns 5 hot posts from any subreddit",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`reddit-comemnts`",
-                    value="Returns up to 10 comemnts from a given post ID",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`reddit-user`",
-                    value="Provides info about the given Redditor",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`reddit-user-comments`",
-                    value="Returns up to 10 comments from a given Redditor",
-                    inline=True,
-                )
+                # embedVar.add_field(
+                    # name="`reddit-new`",
+                    # value="Returns 5 new posts from any subreddit",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`reddit-top`",
+                    # value="Returns 5 top posts from any subreddit",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`reddit-hot`",
+                    # value="Returns 5 hot posts from any subreddit",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`reddit-comemnts`",
+                    # value="Returns up to 10 comemnts from a given post ID",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`reddit-user`",
+                    # value="Provides info about the given Redditor",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`reddit-user-comments`",
+                    # value="Returns up to 10 comments from a given Redditor",
+                    # inline=True,
+                # )
                 embedVar.set_author(
                     name="Rin Help - Reddit", icon_url=bot.user.display_avatar
                 )
@@ -264,28 +259,28 @@ class rinhelp(commands.Cog):
                 )
                 await ctx.respond(embed=embedVar)
 
-            if category in ["spigot", "Spigot", "Spiget", "spiget"]:
-                bot = self.bot
-                embedVar = discord.Embed(color=14414079)
-                embedVar.add_field(
-                    name="`spiget-search`",
-                    value="Searches for Minecraft plugins via Spiget and returns information on such plugin",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`spiget-stats`",
-                    value="Returns stats for Spiget (total resources created, etc)",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`spiget-status`",
-                    value="Returns HTTP Status of the Spiget API",
-                    inline=True,
-                )
-                embedVar.set_author(
-                    name="Rin Help - Spigot", icon_url=bot.user.display_avatar
-                )
-                await ctx.respond(embed=embedVar)
+            # if category in ["spigot", "Spigot", "Spiget", "spiget"]:
+                # bot = self.bot
+                # embedVar = discord.Embed(color=14414079)
+                # embedVar.add_field(
+                    # name="`spiget-search`",
+                    # value="Searches for Minecraft plugins via Spiget and returns information on such plugin",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`spiget-stats`",
+                    # value="Returns stats for Spiget (total resources created, etc)",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`spiget-status`",
+                    # value="Returns HTTP Status of the Spiget API",
+                    # inline=True,
+                # )
+                # embedVar.set_author(
+                    # name="Rin Help - Spigot", icon_url=bot.user.display_avatar
+                # )
+                # await ctx.respond(embed=embedVar)
 
             if category in ["Hypixel", "hypixel"]:
                 bot = self.bot
@@ -319,19 +314,6 @@ class rinhelp(commands.Cog):
                 bot = self.bot
                 embedVar = discord.Embed(color=14414079)
                 embedVar.add_field(
-                    name="`mylvl`", value="Displays DisQuest Level", inline=True
-                )
-                embedVar.add_field(
-                    name="`rank`",
-                    value="Displays the most active members of your server",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`globalrank`",
-                    value="Displays the most active members of all servers that this bot is connected to",
-                    inline=True,
-                )
-                embedVar.add_field(
                     name="`advice`",
                     value="Returns some advice from Advice Slip",
                     inline=True,
@@ -344,11 +326,11 @@ class rinhelp(commands.Cog):
             if category in ["misc", "Misc"]:
                 bot = self.bot
                 embedVar = discord.Embed(color=14414079)
-                embedVar.add_field(
-                    name="`jisho`",
-                    value="Uses Jisho and JMDict in order to obtain info on a word in Japanese",
-                    inline=True,
-                )
+                # embedVar.add_field(
+                    # name="`jisho`",
+                    # value="Uses Jisho and JMDict in order to obtain info on a word in Japanese",
+                    # inline=True,
+                # )
                 embedVar.add_field(
                     name="`rinhelp`", value="Rin's Help command", inline=True
                 )
@@ -380,43 +362,43 @@ class rinhelp(commands.Cog):
                     name="Rin Help - Misc", icon_url=bot.user.display_avatar
                 )
                 await ctx.respond(embed=embedVar)
-
-            if category in ["deviantart", "da", "DevintArt"]:
-                bot = self.bot
-                embedVar = discord.Embed(color=14414079)
-                embedVar.add_field(
-                    name="`deviantart-item`",
-                    value="Returns image and some info about that item",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`deviantart-newest`",
-                    value="Returns 5 newest art based on selected category",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`deviantart-popular`",
-                    value="Returns 5 popular works of art based on selected category",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`deviantart-tag-search`",
-                    value="Returns 5 works of art based on selected tags",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`deviantart-user`",
-                    value="Returns info about the given user",
-                    inline=True,
-                )
-                embedVar.set_footer(
-                    text='These cmds have the prefix of "deviantart". This prefix can be swapped out for "da" instead. For example, the "deviantart-item" cmd can be shorten to "da-item"'
-                )
-                embedVar.set_author(
-                    name="Rin Help - Deviantart", icon_url=bot.user.display_avatar
-                )
-                await ctx.respond(embed=embedVar)
-
+# 
+            # if category in ["deviantart", "da", "DevintArt"]:
+                # bot = self.bot
+                # embedVar = discord.Embed(color=14414079)
+                # embedVar.add_field(
+                    # name="`deviantart-item`",
+                    # value="Returns image and some info about that item",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`deviantart-newest`",
+                    # value="Returns 5 newest art based on selected category",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`deviantart-popular`",
+                    # value="Returns 5 popular works of art based on selected category",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`deviantart-tag-search`",
+                    # value="Returns 5 works of art based on selected tags",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`deviantart-user`",
+                    # value="Returns info about the given user",
+                    # inline=True,
+                # )
+                # embedVar.set_footer(
+                    # text='These cmds have the prefix of "deviantart". This prefix can be swapped out for "da" instead. For example, the "deviantart-item" cmd can be shorten to "da-item"'
+                # )
+                # embedVar.set_author(
+                    # name="Rin Help - Deviantart", icon_url=bot.user.display_avatar
+                # )
+                # await ctx.respond(embed=embedVar)
+# 
             if category in ["anime", "Anime"]:
                 bot = self.bot
                 embedVar = discord.Embed(color=14414079)
@@ -454,24 +436,24 @@ class rinhelp(commands.Cog):
                     value="Seaches on Jikan/MyAnimeList and provides info about the given manga",
                     inline=True,
                 )
-                embedVar.add_field(
-                    name="`jikan-top`",
-                    value="Returns the Top 10 items on Jikan/MAL",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`jikan-season`",
-                    value="Returns 5 animes within those given years and seasons",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`jikan-season-later`",
-                    value="Returns 5 animes that are already planned for viewing in the future",
-                    inline=True,
-                )
-                embedVar.set_footer(
-                    text='Also note that the prefix can be shorten down to "jk"'
-                )
+                # embedVar.add_field(
+                    # name="`jikan-top`",
+                    # value="Returns the Top 10 items on Jikan/MAL",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`jikan-season`",
+                    # value="Returns 5 animes within those given years and seasons",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`jikan-season-later`",
+                    # value="Returns 5 animes that are already planned for viewing in the future",
+                    # inline=True,
+                # )
+                # embedVar.set_footer(
+                    # text='Also note that the prefix can be shorten down to "jk"'
+                # )
                 embedVar.set_author(
                     name="Rin Help - MyAnimeList/Jikan",
                     icon_url=bot.user.display_avatar,
@@ -537,7 +519,7 @@ class rinhelp(commands.Cog):
                 embedVar = discord.Embed(color=14414079)
                 embedVar.add_field(
                     name="`tenor-search-multiple`",
-                    value="Searches 5 gifs from Tenor",
+                    value="Searches 3 gifs from Tenor",
                     inline=True,
                 )
                 embedVar.add_field(
@@ -563,38 +545,38 @@ class rinhelp(commands.Cog):
                 embedVar.add_field(
                     name="`tenor-gif`", value="SEarches for 1 gif on Tenor", inline=True
                 )
-                embedVar.add_field(
-                    name="`tenor-random`",
-                    value="Returns a random gif based on the search term",
-                    inline=True,
-                )
+                # embedVar.add_field(
+                    # name="`tenor-random`",
+                    # value="Returns a random gif based on the search term",
+                    # inline=True,
+                # )
                 embedVar.set_author(
                     name="Rin Help - Tenor", icon_url=bot.user.display_avatar
                 )
                 await ctx.respond(embed=embedVar)
 
-            if category in ["openai", "ai", "gpt-3", "OpenAI"]:
-                bot = self.bot
-                embedVar = discord.Embed(color=14414079)
-                embedVar.add_field(
-                    name="`openai-complete`",
-                    value="Completes a sentence using GPT-3",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`openai-classify`",
-                    value="Classifies a sentence into negative or positive (using AI)",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`openai-answers`",
-                    value="Generates answers written by AI for a given question",
-                    inline=True,
-                )
-                embedVar.set_author(
-                    name="Rin Help - OpenAI", icon_url=bot.user.display_avatar
-                )
-                await ctx.respond(embed=embedVar)
+            # if category in ["openai", "ai", "gpt-3", "OpenAI"]:
+                # bot = self.bot
+                # embedVar = discord.Embed(color=14414079)
+                # embedVar.add_field(
+                    # name="`openai-complete`",
+                    # value="Completes a sentence using GPT-3",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`openai-classify`",
+                    # value="Classifies a sentence into negative or positive (using AI)",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`openai-answers`",
+                    # value="Generates answers written by AI for a given question",
+                    # inline=True,
+                # )
+                # embedVar.set_author(
+                    # name="Rin Help - OpenAI", icon_url=bot.user.display_avatar
+                # )
+                # await ctx.respond(embed=embedVar)
             if category in ["modrinth", "Modrinth"]:
                 bot = self.bot
                 embedVar = discord.Embed(color=14414079)
@@ -608,36 +590,36 @@ class rinhelp(commands.Cog):
                     value="Returns info about the given mod",
                     inline=True,
                 )
-                embedVar.add_field(
-                    name="`modrinth-mod-versions`",
-                    value="Lists out all of the versions for a mod (may cause spam)",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`modrinth-mod-version`",
-                    value="Returns info about the mod using the version ID",
-                    inline=True,
-                )
+                # embedVar.add_field(
+                    # name="`modrinth-mod-versions`",
+                    # value="Lists out all of the versions for a mod (may cause spam)",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`modrinth-mod-version`",
+                    # value="Returns info about the mod using the version ID",
+                    # inline=True,
+                # )
                 embedVar.add_field(
                     name="`modrinth-user`",
                     value="Returns info on the given user",
                     inline=True,
                 )
-                embedVar.add_field(
-                    name="`modrinth-user-projects`",
-                    value="Returns info on the given user's projects",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`modrinth-project-team-members`",
-                    value="Lists out all of the team members for a project",
-                    inline=True,
-                )
-                embedVar.add_field(
-                    name="`modrinth-team-members`",
-                    value="Returns the team members within the given user",
-                    inline=True,
-                )
+                # embedVar.add_field(
+                    # name="`modrinth-user-projects`",
+                    # value="Returns info on the given user's projects",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`modrinth-project-team-members`",
+                    # value="Lists out all of the team members for a project",
+                    # inline=True,
+                # )
+                # embedVar.add_field(
+                    # name="`modrinth-team-members`",
+                    # value="Returns the team members within the given user",
+                    # inline=True,
+                # )
                 embedVar.set_author(
                     name="Rin Help - Modrinth", icon_url=bot.user.display_avatar
                 )

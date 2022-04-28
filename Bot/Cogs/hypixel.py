@@ -6,7 +6,7 @@ import discord
 import orjson
 import simdjson
 import uvloop
-from discord.commands import slash_command
+from discord.commands import slash_command, Option
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -24,7 +24,7 @@ class hypixel_api(commands.Cog):
         name="hypixel-user",
         description="Returns Info About A Minecraft User on Hypixel",
     )
-    async def hypixel_user(self, ctx, *, uuid: str):
+    async def hypixel_user(self, ctx, *, uuid: Option(str, "The Minecraft UUID of the user")):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             params = {"uuid": uuid, "key": hypixel_api_key}
             async with session.get(
@@ -131,7 +131,7 @@ class hypixel_status(commands.Cog):
         name="hypixel-player-status",
         description="Returns the given player's online status",
     )
-    async def player_status(self, ctx, *, uuid: str):
+    async def player_status(self, ctx, *, uuid: Option(str, "The UUID of the Minecraft player")):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             params = {"uuid": uuid, "key": hypixel_api_key}
             async with session.get(

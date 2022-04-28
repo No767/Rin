@@ -36,7 +36,7 @@ class DiscordBotsV1(commands.Cog):
     ):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {"Authorization": apiKey}
-            params = {"q": search, "sort": sort, "limit": 5}
+            params = {"q": search, "sort": sort, "limit": 3}
             async with session.get(
                 "https://discord.bots.gg/api/v1/bots", headers=headers, params=params
             ) as r:

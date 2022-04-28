@@ -22,7 +22,7 @@ class TenorV1(commands.Cog):
 
     @slash_command(
         name="tenor-search-multiple",
-        description="Searches for up to 5 gifs on Tenor",
+        description="Searches for up to 3 gifs on Tenor",
     )
     async def tenor_search(
         self, ctx, *, search_term: Option(str, "Search Term for GIFs")
@@ -32,7 +32,7 @@ class TenorV1(commands.Cog):
                 "q": search_term,
                 "key": Tenor_API_Key,
                 "contentfilter": "medium",
-                "limit": 5,
+                "limit": 3,
                 "media_filter": "minimal",
             }
             async with session.get("https://g.tenor.com/v1/search", params=params) as r:
@@ -120,14 +120,14 @@ class TenorV3(commands.Cog):
 
     @slash_command(
         name="tenor-trending",
-        description="Returns up to 5 trending gifs from Tenor",
+        description="Returns up to 3 trending gifs from Tenor",
     )
     async def tenor_trending(self, ctx):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             params = {
                 "key": Tenor_API_Key,
                 "contentfilter": "medium",
-                "limit": 5,
+                "limit": 3,
                 "media_filter": "minimal",
             }
             async with session.get(
@@ -310,7 +310,7 @@ class TenorV7(commands.Cog):
 
     @slash_command(
         name="tenor-random",
-        description="Gives a random gif from Tenor based on given search term",
+        description="Gives 3 random gif from Tenor based on given search term",
     )
     async def tenor_random(
         self, ctx, *, search_random_term: Option(str, "Search Term")
@@ -318,7 +318,7 @@ class TenorV7(commands.Cog):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             params = {
                 "key": Tenor_API_Key,
-                "limit": 5,
+                "limit": 3,
                 "media_filter": "minimal",
                 "contentfilter": "medium",
                 "q": search_random_term,

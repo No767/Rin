@@ -1,9 +1,6 @@
-# ✨ Rin V2.0.2 ✨
+# ✨ Rin V2.0.3 ✨
 
-This is a quick patch update that fixes some of the frc events commands.
+This version is a really stripped down version of Rin. It's intended for use in discord bot verification, and will be the one used on discord.bots.gg. After the acceptance, Rin will be back on v2.0.2 (or maybe v2.0.4)
 
-## Changes
-
-- Fix FRC Events commands being broken
-- (Uncompleted) Add preliminary support for Blue Alliance
-- Clean up some code
+# Changes
+- disabled a ton of commands...

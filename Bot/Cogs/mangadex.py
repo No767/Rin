@@ -17,7 +17,7 @@ class MangaDexV1(commands.Cog):
 
     @slash_command(
         name="mangadex-search",
-        description="Searches for up to 5 manga on MangaDex",
+        description="Searches for up to 3 manga on MangaDex",
     )
     async def manga(self, ctx, *, manga: Option(str, "Name of Manga")):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
@@ -26,7 +26,7 @@ class MangaDexV1(commands.Cog):
                 "publicationDemographic[]": "none",
                 "contentRating[]": "safe",
                 "order[title]": "asc",
-                "limit": 5,
+                "limit": 3,
             }
             async with session.get(
                 f"https://api.mangadex.org/manga/", params=params
@@ -466,8 +466,8 @@ class MangaDexReaderV1(commands.Cog):
 
 def setup(bot):
     bot.add_cog(MangaDexV1(bot))
-    bot.add_cog(MangaDexV2(bot))
-    bot.add_cog(MangaDexV3(bot))
+    # bot.add_cog(MangaDexV2(bot))
+    # bot.add_cog(MangaDexV3(bot))
     # bot.add_cog(MangaDexV4(bot))
     # bot.add_cog(MangaDexV5(bot))
     # bot.add_cog(MangaDexV6(bot)) # Broken, and will fix later

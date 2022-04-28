@@ -17,21 +17,19 @@ class ModrinthV1(commands.Cog):
 
     @slash_command(
         name="modrinth-search",
-        description="Searches for up to 5 mods on Modrinth",
+        description="Searches for up to 3 mods on Modrinth",
     )
     async def modrinthSearch(
         self,
         ctx,
         *,
-        mod: Option(str, "The name of the mod"),
-        modloader: Option(str, "Forge or Fabric"),
+        mod: Option(str, "The name of the mod")
     ):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             params = {
                 "query": mod,
                 "index": "relevance",
-                "limit": 5,
-                "facets": f'[["categories:{modloader}"]]',
+                "limit": 3,
             }
             async with session.get(
                 "https://api.modrinth.com/v2/search", params=params
@@ -70,7 +68,7 @@ class ModrinthV2(commands.Cog):
         description="Gets info about the mod requested",
     )
     async def modrinthProject(
-        self, ctx, *, mod_slug: Option(str, "The ID or slug of the project")
+        self, ctx, *, mod_slug: Option(str, "The ID or slug of the project (for example, for the Iris mod, just input iris")
     ):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             async with session.get(
@@ -429,8 +427,8 @@ def setup(bot):
     bot.add_cog(ModrinthV1(bot))
     bot.add_cog(ModrinthV2(bot))
     # bot.add_cog(ModrinthV3(bot)) # Disabled due to spam issues
-    bot.add_cog(ModrinthV4(bot))
+    # bot.add_cog(ModrinthV4(bot))
     bot.add_cog(ModrinthV5(bot))
     # bot.add_cog(ModrinthV6(bot))
-    bot.add_cog(ModrinthV7(bot))
-    bot.add_cog(ModrinthV8(bot))
+    # bot.add_cog(ModrinthV7(bot))
+    # bot.add_cog(ModrinthV8(bot))

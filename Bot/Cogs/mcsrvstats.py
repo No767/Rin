@@ -5,7 +5,7 @@ import discord
 import orjson
 import simdjson
 import uvloop
-from discord.commands import slash_command
+from discord.commands import slash_command, Option
 from discord.ext import commands
 
 parser = simdjson.Parser()
@@ -19,7 +19,7 @@ class mcsrvstats(commands.Cog):
         name="java",
         description="Returns info about the given Minecraft Java server",
     )
-    async def java(self, ctx, server: str):
+    async def java(self, ctx, server: Option(str, "The Domain name (ex. hypixel.net) for the Minecraft server")):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             async with session.get(f"https://api.mcsrvstat.us/2/{server}") as r:
                 mcsrv = await r.content.read()
@@ -103,7 +103,7 @@ class bedrock_mcsrvstats(commands.Cog):
         name="bedrock",
         description="Returns info about the given Minecraft Bedrock server",
     )
-    async def bedrock(self, ctx, server: str):
+    async def bedrock(self, ctx, server: Option(str, "The Domain name (ex. hypixel.net) for the Minecraft server")):
         async with aiohttp.ClientSession(json_serialize=orjson.loads) as session:
             async with session.get(f"https://api.mcsrvstat.us/bedrock/2/{server}") as r:
                 bedmcsrv = await r.content.read()
