@@ -20,7 +20,7 @@ class waifu(commands.Cog):
     async def on_message(self, ctx):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36"
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36"
             }
             async with session.get(
                 "https://www.mywaifulist.moe/random", headers=headers

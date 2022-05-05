@@ -15,6 +15,12 @@ load_dotenv()
 hypixel_api_key = os.getenv("Hypixel_API_Key")
 parser = simdjson.Parser()
 
+class Error(Exception):
+    pass
+
+
+class UnknownPlayer(Error):
+    pass
 
 class hypixel_api(commands.Cog):
     def __init__(self, bot):
@@ -33,52 +39,61 @@ class hypixel_api(commands.Cog):
                 player = await r.content.read()
                 playerMain = parser.parse(player, recursive=True)
                 try:
-                    if str(playerMain["success"]) == "True":
-                        discord_embed = discord.Embed(
-                            color=discord.Color.from_rgb(186, 244, 255)
-                        )
-                        filterMainV3 = [
-                            "achievements",
-                            "achievementsOneTime",
-                            "stats",
-                            "petConsumables",
-                            "monthlycrates",
-                            "parkourCheckpointBests",
-                            "parkourCompletions",
-                            "quests",
-                            "housingMeta",
-                            "firstLogin",
-                            "lastLogin",
-                            "knownAliasesLower",
-                            "vanityMeta",
-                            "lastAdsenseGenerateTime",
-                            "lastLogout",
-                            "challenges",
-                            "adventRewards2020",
-                            "achievementRewardsNew",
-                            "adsense_tokens",
-                            "displayname"
-                        ]
-                        for key, value in playerMain["player"].items():
-                            if key not in filterMainV3:
-                                discord_embed.add_field(
-                                    name=key, value=value, inline=True
-                                )
-                        discord_embed.title = playerMain["player"]["displayname"]
-                        await ctx.respond(embed=discord_embed)
-                    else:
-                        embedVar = discord.Embed()
-                        embedVar.description = "The query was not successful"
-                        embedVar.add_field(
-                            name="Success", value=playerMain["success"], inline=True
-                        )
-                        embedVar.add_field(
-                            name="Cause", value=playerMain["cause"], inline=True
-                        )
-                        embedVar.add_field(
-                            name="HTTP Response Status", value=r.status, inline=True
-                        )
-                        await ctx.respond(embed=embedVar)
+                    try:
+                        print(playerMain)
+                        if str(playerMain["success"]) == "True":
+                            discord_embed = discord.Embed(
+                                color=discord.Color.from_rgb(186, 244, 255)
+                            )
+                            filterMainV3 = [
+                                "achievements",
+                                "achievementsOneTime",
+                                "stats",
+                                "petConsumables",
+                                "monthlycrates",
+                                "parkourCheckpointBests",
+                                "parkourCompletions",
+                                "quests",
+                                "housingMeta",
+                                "firstLogin",
+                                "lastLogin",
+                                "knownAliasesLower",
+                                "vanityMeta",
+                                "lastAdsenseGenerateTime",
+                                "lastLogout",
+                                "challenges",
+                                "adventRewards2020",
+                                "achievementRewardsNew",
+                                "adsense_tokens",
+                                "displayname"
+                            ]
+                            if "None" in playerMain["player"]:
+                                raise UnknownPlayer
+                            else:
+                                for key, value in playerMain["player"].items():
+                                    if key not in filterMainV3:
+                                        discord_embed.add_field(
+                                            name=key, value=value, inline=True
+                                        )
+                                discord_embed.title = playerMain["player"]["displayname"]
+                                await ctx.respond(embed=discord_embed)
+                        else:
+                            embedVar = discord.Embed()
+                            embedVar.description = "The query was not successful"
+                            embedVar.add_field(
+                                name="Success", value=playerMain["success"], inline=True
+                            )
+                            embedVar.add_field(
+                                name="Cause", value=playerMain["cause"], inline=True
+                            )
+                            embedVar.add_field(
+                                name="HTTP Response Status", value=r.status, inline=True
+                            )
+                            await ctx.respond(embed=embedVar)
+                    except UnknownPlayer:
+                        embedValError = discord.Embed()
+                        embedValError.description = "It seems like that the player wasn't online.... Please try again"
+                        await ctx.respond(embed=embedValError)
                 except Exception as e:
                     embedVar = discord.Embed()
                     embedVar.description = "The query was not successful."
@@ -140,6 +155,7 @@ class hypixel_status(commands.Cog):
                 player_statusv3 = await rep.content.read()
                 playerStatusMain = parser.parse(
                     player_statusv3, recursive=True)
+                print(playerStatusMain)
                 try:
                     if str(playerStatusMain["success"]) == "True":
                         filterKeys = ["session"]

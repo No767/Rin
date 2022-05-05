@@ -204,7 +204,7 @@ class TenorV4(commands.Cog):
                     await ctx.respond(embed=embedVar)
                 except Exception as e:
                     embedVar = discord.Embed()
-                    embedVar.description = "Sorry, but the search for {search} has failed. Please try again..."
+                    embedVar.description = f"Sorry, but the search for {search_suggestion} has failed. Please try again..."
                     embedVar.add_field(name="Reason", value=e, inline=True)
                     await ctx.respond(embed=embedVar)
 

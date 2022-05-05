@@ -35,10 +35,13 @@ class ModrinthV1(commands.Cog):
                 "https://api.modrinth.com/v2/search", params=params
             ) as r:
                 data = await r.content.read()
-                dataMain = parser.parse(data)
+                dataMain = parser.parse(data, recursive=True)
                 modFilter = ["title", "gallery", "icon_url", "description"]
                 embedVar = discord.Embed()
                 try:
+                    print(dataMain)
+                    if len(dataMain["hits"]) == 0:
+                        raise ValueError
                     for dictItem in dataMain["hits"]:
                         for k, v in dictItem.items():
                             if k not in modFilter:
@@ -49,11 +52,10 @@ class ModrinthV1(commands.Cog):
                         embedVar.description = dictItem["description"]
                         embedVar.set_thumbnail(url=dictItem["icon_url"])
                         await ctx.respond(embed=embedVar)
-                except Exception as e:
+                except ValueError:
                     embedVar.description = (
-                        "Sorry, but the query could not be made. Please try again..."
+                        f"Sorry, but there are no mods named {mod}. Please try again"
                     )
-                    embedVar.add_field(name="Reason", value=e, inline=True)
                     await ctx.respond(embed=embedVar)
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -106,11 +108,12 @@ class ModrinthV2(commands.Cog):
                     )
                     await ctx.respond(embed=embedVar)
                 except Exception as e:
-                    embedVar.description = (
+                    embedError = discord.Embed()
+                    embedError.description = (
                         "Sorry, but the query could not be made. Please try again..."
                     )
-                    embedVar.add_field(name="Reason", value=e, inline=True)
-                    await ctx.respond(embed=embedVar)
+                    embedError.add_field(name="Reason", value=e, inline=True)
+                    await ctx.respond(embed=embedError)
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 

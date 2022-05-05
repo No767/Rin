@@ -45,45 +45,48 @@ class JikanV1(commands.Cog):
                     "trailer",
                 ]
                 try:
-                    for dictItem in dataMain["data"]:
-                        embedVar = discord.Embed()
-                        embedVar.title = dictItem["title"]
-                        embedVar.description = dictItem["synopsis"]
-                        for key, value in dictItem.items():
-                            if key not in filterList:
+                    if len(dataMain["data"]) == 0:
+                        raise ValueError
+                    else:
+                        for dictItem in dataMain["data"]:
+                            embedVar = discord.Embed()
+                            embedVar.title = dictItem["title"]
+                            embedVar.description = dictItem["synopsis"]
+                            for key, value in dictItem.items():
+                                if key not in filterList:
+                                    embedVar.add_field(
+                                        name=str(key).replace(
+                                            "_", " ").capitalize(),
+                                        value=value,
+                                        inline=True,
+                                    )
+                            for item in dictItem["genres"]:
                                 embedVar.add_field(
-                                    name=str(key).replace(
-                                        "_", " ").capitalize(),
-                                    value=value,
+                                    name="Genres", value=f'[{item["name"]}]', inline=True
+                                )
+                            for item2 in dictItem["demographics"]:
+                                embedVar.add_field(
+                                    name="Demographics",
+                                    value=f'[{item2["name"]}]',
                                     inline=True,
                                 )
-                        for item in dictItem["genres"]:
+                            for item3 in dictItem["themes"]:
+                                embedVar.add_field(
+                                    name="Themes", value=f'[{item3["name"]}]', inline=True
+                                )
                             embedVar.add_field(
-                                name="Genres", value=f'[{item["name"]}]', inline=True
+                                name="Aired", value=dictItem["aired"]["string"], inline=True
                             )
-                        for item2 in dictItem["demographics"]:
-                            embedVar.add_field(
-                                name="Demographics",
-                                value=f'[{item2["name"]}]',
-                                inline=True,
+                            embedVar.set_image(
+                                url=dictItem["images"]["jpg"]["large_image_url"]
                             )
-                        for item3 in dictItem["themes"]:
-                            embedVar.add_field(
-                                name="Themes", value=f'[{item3["name"]}]', inline=True
-                            )
-                        embedVar.add_field(
-                            name="Aired", value=dictItem["aired"]["string"], inline=True
-                        )
-                        embedVar.set_image(
-                            url=dictItem["images"]["jpg"]["large_image_url"]
-                        )
-                        await ctx.respond(embed=embedVar)
-                except Exception as e:
+                            await ctx.respond(embed=embedVar)
+                except ValueError:
                     embedVar = discord.Embed()
                     embedVar.description = (
-                        "The query could not be done. Please try again"
+                        "Sorry, but the anime you searched for either wasn't found or doesn't exist. Please try again"
                     )
-                    embedVar.add_field(name="Reason", value=e, inline=True)
+                    # embedVar.add_field(name="Reason", value=e, inline=True)
                     await ctx.respond(embed=embedVar)
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())

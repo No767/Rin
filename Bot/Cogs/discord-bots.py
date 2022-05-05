@@ -51,16 +51,24 @@ class DiscordBotsV1(commands.Cog):
                 ]
                 embedVar = discord.Embed()
                 try:
-                    for dictItem in dataMain["bots"]:
-                        for k, v in dictItem.items():
-                            if k not in filterMain:
-                                embedVar.add_field(
-                                    name=k, value=v, inline=True)
-                                embedVar.remove_field(-18)
-                        embedVar.title = dictItem["username"]
-                        embedVar.description = dictItem["shortDescription"]
-                        embedVar.set_thumbnail(url=dictItem["avatarURL"])
-                        await ctx.respond(embed=embedVar)
+                    try:
+                        if len(dataMain["bots"]) == 0:
+                            raise ValueError
+                        else:
+                            for dictItem in dataMain["bots"]:
+                                for k, v in dictItem.items():
+                                    if k not in filterMain:
+                                        embedVar.add_field(
+                                            name=k, value=v, inline=True)
+                                        embedVar.remove_field(-18)
+                                embedVar.title = dictItem["username"]
+                                embedVar.description = dictItem["shortDescription"]
+                                embedVar.set_thumbnail(url=dictItem["avatarURL"])
+                                await ctx.respond(embed=embedVar)
+                    except ValueError:
+                        embedValueError = discord.Embed()
+                        embedValueError.description = "Oh no, it seems like there are no bots that matches your search. Please try again"
+                        await ctx.respond(embed=embedValueError)
                 except Exception as e:
                     embedError = discord.Embed()
                     embedError.description = (
@@ -99,19 +107,27 @@ class DiscordBotsV2(commands.Cog):
                     "username",
                     "longDescription",
                 ]
-                for dictKey, dictVal in dataMain2.items():
-                    if dictKey not in filterMain2:
-                        embedVar.add_field(
-                            name=dictKey, value=dictVal, inline=True)
-                for dictKey1, dictVal1 in dataMain2["owner"].items():
-                    embedVar.add_field(
-                        name=dictKey1, value=dictVal1, inline=True)
-                embedVar.title = dataMain2["username"]
-                embedVar.description = (
-                    f"{dataMain2['shortDescription']}\n\n{dataMain2['longDescription']}"
-                )
-                embedVar.set_thumbnail(url=dataMain2["avatarURL"])
-                await ctx.respond(embed=embedVar)
+                try:
+                    if "message" in dataMain2["message"]:
+                        raise Exception
+                    else:
+                        for dictKey, dictVal in dataMain2.items():
+                            if dictKey not in filterMain2:
+                                embedVar.add_field(
+                                    name=dictKey, value=dictVal, inline=True)
+                        for dictKey1, dictVal1 in dataMain2["owner"].items():
+                            embedVar.add_field(
+                                name=dictKey1, value=dictVal1, inline=True)
+                        embedVar.title = dataMain2["username"]
+                        embedVar.description = (
+                            f"{dataMain2['shortDescription']}\n\n{dataMain2['longDescription']}"
+                        )
+                        embedVar.set_thumbnail(url=dataMain2["avatarURL"])
+                        await ctx.respond(embed=embedVar)
+                except Exception:
+                    embedError = discord.Embed()
+                    embedError.description = "It seems like that the bot doesn't exist... Please try again"
+                    await ctx.respond(embed=embedError)
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
