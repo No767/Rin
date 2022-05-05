@@ -28,6 +28,10 @@ RUN pipenv run pip install --upgrade pip setuptools wheel
 RUN pipenv install
 RUN dos2unix /Bot/Bot/rinbot.py
 EXPOSE 4001
+ARG PM2_PUBLIC_KEY_INGEST
+ARG PM2_SECRET_KEY_INGEST
+ENV PM2_PUBLIC_KEY=${PM2_PUBLIC_KEY_INGEST}
+ENV PM2_SECRET_KEY=${PM2_SECRET_KEY_INGEST}
 CMD ["pm2-runtime", "pipenv run /Bot/Bot/rinbot.py"]
 
 

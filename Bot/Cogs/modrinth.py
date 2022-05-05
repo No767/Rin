@@ -39,7 +39,6 @@ class ModrinthV1(commands.Cog):
                 modFilter = ["title", "gallery", "icon_url", "description"]
                 embedVar = discord.Embed()
                 try:
-                    print(dataMain)
                     if len(dataMain["hits"]) == 0:
                         raise ValueError
                     for dictItem in dataMain["hits"]:

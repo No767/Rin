@@ -21,7 +21,7 @@ hood, which is 2 times faster than Node.js and reaches the same speeds as many G
 
 # Prefix
 
-Rin's prefix is `/`.
+Rin's prefix is `/`
 
 # Inviting the Bot
 
