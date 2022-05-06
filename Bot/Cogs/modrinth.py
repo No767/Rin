@@ -254,6 +254,7 @@ class ModrinthV5(commands.Cog):
                 userDataMain = parser.parse(userData, recursive=True)
                 embedVar = discord.Embed()
                 userFilter = ["bio", "username", "avatar_url"]
+                print(userDataMain)
                 try:
                     for userKeys, userValue in userDataMain.items():
                         if userKeys not in userFilter:
@@ -264,12 +265,12 @@ class ModrinthV5(commands.Cog):
                     embedVar.description = userDataMain["bio"]
                     embedVar.set_thumbnail(url=userDataMain["avatar_url"])
                     await ctx.respond(embed=embedVar)
-                except Exception as e:
-                    embedVar.description = (
+                except ValueError:
+                    embedError = discord.Embed()
+                    embedError.description = (
                         "Sorry, but the query could not be made. Please try again..."
                     )
-                    embedVar.add_field(name="Reason", value=e, inline=True)
-                    await ctx.respond(embed=embedVar)
+                    await ctx.respond(embed=embedError)
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -430,7 +431,7 @@ def setup(bot):
     bot.add_cog(ModrinthV2(bot))
     # bot.add_cog(ModrinthV3(bot)) # Disabled due to spam issues
     # bot.add_cog(ModrinthV4(bot))
-    bot.add_cog(ModrinthV5(bot))
+    # bot.add_cog(ModrinthV5(bot)) # Unable to handle exceptions
     # bot.add_cog(ModrinthV6(bot))
     # bot.add_cog(ModrinthV7(bot))
     # bot.add_cog(ModrinthV8(bot))

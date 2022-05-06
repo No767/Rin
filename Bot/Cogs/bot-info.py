@@ -5,6 +5,7 @@ import discord
 import uvloop
 from discord.commands import slash_command
 from discord.ext import commands
+import platform
 
 
 def discord_colors():
@@ -31,14 +32,18 @@ class botInfo(commands.Cog):
         average_members_per_guild = total_members / len(guilds)
         embed = discord.Embed(color=discord_colors())
         embed.title = "Bot Info"
-        embed.add_field(name="Name", value=name, inline=False)
-        embed.add_field(name="Servers", value=len(guilds), inline=False)
-        embed.add_field(name="Total Users", value=total_members, inline=False)
+        embed.add_field(name="Name", value=name, inline=True)
+        embed.add_field(name="Servers", value=len(guilds), inline=True)
+        embed.add_field(name="Total Users", value=total_members, inline=True)
         embed.add_field(
             name="Average Users Per Server",
             value=average_members_per_guild,
-            inline=False,
+            inline=True,
         )
+        embed.add_field(name="OS", value=f"[{platform.system()}]", inline=True)
+        embed.add_field(name="Kernel", value=f"[{platform.release()}]", inline=True)
+        embed.add_field(name="Machine Type", value=f"[{platform.machine()}]", inline=True)
+        embed.add_field(name="Python Version", value=f"[{platform.python_version()}]", inline=True)
         embed.set_thumbnail(url=bot.user.display_avatar)
         await ctx.respond(embed=embed)
 
