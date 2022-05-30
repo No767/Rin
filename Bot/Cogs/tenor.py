@@ -7,7 +7,7 @@ import orjson
 import simdjson
 import uvloop
 from discord.commands import Option, slash_command
-from discord.ext import commands
+from discord.ext import commands, pages
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -39,32 +39,36 @@ class TenorV1(commands.Cog):
                 data = await r.content.read()
                 dataMain = parser.parse(data, recursive=True)
                 try:
-                    embedVar = discord.Embed()
-                    filterList = [
-                        "created",
-                        "bg_color",
-                        "content_rating",
-                        "title",
-                        "h1_title",
-                        "itemurl",
-                        "url",
-                        "shares",
-                        "hasaudio",
-                        "hascaption",
-                        "source_id",
-                        "composite",
-                        "tags",
-                        "flags",
-                        "media",
-                        "content_description",
-                    ]
-                    for dictItem in dataMain["results"]:
-                        for key in dictItem.items():
-                            if key not in filterList:
-                                embedVar.title = dictItem["content_description"]
-                        for item in dictItem.get("media"):
-                            embedVar.set_image(url=item["gif"]["url"])
-                        await ctx.respond(embed=embedVar)
+                    try:
+                        if len(dataMain["results"]) == 0:
+                            raise ValueError
+                        else:
+                            mainPages = pages.Paginator(
+                                pages=[
+                                    discord.Embed(
+                                        title=dictItem["content_description"]
+                                    ).set_image(
+                                        url=str(
+                                            [
+                                                item["gif"]["url"]
+                                                for item in dictItem.get("media")
+                                            ]
+                                        )
+                                        .replace("[", "")
+                                        .replace("]", "")
+                                        .replace("'", "")
+                                    )
+                                    for dictItem in dataMain["results"]
+                                ],
+                                loop_pages=True,
+                            )
+                            await mainPages.respond(ctx.interaction, ephemeral=False)
+                    except ValueError:
+                        embedNoItemsError = discord.Embed()
+                        embedNoItemsError.description = (
+                            "No GIFs found for that search term"
+                        )
+                        await ctx.respond(embed=embedNoItemsError)
                 except Exception as e:
                     embedVar = discord.Embed()
                     embedVar.description = f"Sorry, but the search for {search_term} has failed. Please try again..."
@@ -99,12 +103,36 @@ class TenorV2(commands.Cog):
                 data2 = await re.content.read()
                 dataMain2 = parser.parse(data2, recursive=True)
                 try:
-                    embedVar1 = discord.Embed()
-                    embedVar1.title = dataMain2["results"][0]["content_description"]
-                    embedVar1.set_image(
-                        url=dataMain2["results"][0]["media"][0]["gif"]["url"]
-                    )
-                    await ctx.respond(embed=embedVar1)
+                    try:
+                        if len(dataMain2["results"]) == 0:
+                            raise ValueError
+                        else:
+                            embedPages = pages.Paginator(
+                                pages=[
+                                    discord.Embed(
+                                        title=dictItem["content_description"]
+                                    ).set_image(
+                                        url=str(
+                                            [
+                                                item["gif"]["url"]
+                                                for item in dictItem.get("media")
+                                            ]
+                                        )
+                                        .replace("[", "")
+                                        .replace("]", "")
+                                        .replace("'", "")
+                                    )
+                                    for dictItem in dataMain2["results"]
+                                ],
+                                loop_pages=True,
+                            )
+                            await embedPages.respond(ctx.interaction, ephemeral=False)
+                    except ValueError:
+                        embedNoItemsError = discord.Embed()
+                        embedNoItemsError.description = (
+                            "No GIFs found for that search term"
+                        )
+                        await ctx.respond(embed=embedNoItemsError)
                 except Exception as e:
                     embedVar = discord.Embed()
                     embedVar.description = f"Sorry, but the search for {search_one_term} has failed. Please try again..."
@@ -136,32 +164,36 @@ class TenorV3(commands.Cog):
                 data3 = await response.content.read()
                 dataMain3 = parser.parse(data3, recursive=True)
                 try:
-                    embedVar = discord.Embed()
-                    filterList2 = [
-                        "created",
-                        "bg_color",
-                        "content_rating",
-                        "title",
-                        "h1_title",
-                        "itemurl",
-                        "url",
-                        "shares",
-                        "hasaudio",
-                        "hascaption",
-                        "source_id",
-                        "composite",
-                        "tags",
-                        "flags",
-                        "media",
-                        "content_description",
-                    ]
-                    for dictItem2 in dataMain3["results"]:
-                        for key in dictItem2.items():
-                            if key not in filterList2:
-                                embedVar.title = dictItem2["content_description"]
-                        for item2 in dictItem2.get("media"):
-                            embedVar.set_image(url=item2["gif"]["url"])
-                        await ctx.respond(embed=embedVar)
+                    try:
+                        if len(dataMain3["results"]) == 0:
+                            raise ValueError
+                        else:
+                            embedPages = pages.Paginator(
+                                pages=[
+                                    discord.Embed(
+                                        title=dictItem2["content_description"]
+                                    ).set_image(
+                                        url=str(
+                                            [
+                                                item["gif"]["url"]
+                                                for item in dictItem2.get("media")
+                                            ]
+                                        )
+                                        .replace("[", "")
+                                        .replace("]", "")
+                                        .replace("'", "")
+                                    )
+                                    for dictItem2 in dataMain3["results"]
+                                ],
+                                loop_pages=True,
+                            )
+                            await embedPages.respond(ctx.interaction, ephemeral=False)
+                    except ValueError:
+                        embedNoItemsError = discord.Embed()
+                        embedNoItemsError.description = (
+                            "Apparently there are no trending gifs... werid huh"
+                        )
+                        await ctx.respond(embed=embedNoItemsError)
                 except Exception as e:
                     embedVar = discord.Embed()
                     embedVar.description = (
@@ -196,12 +228,22 @@ class TenorV4(commands.Cog):
                 data5 = await resp.content.read()
                 dataMain5 = parser.parse(data5, recursive=True)
                 try:
-                    embedVar = discord.Embed()
-                    embedVar.title = "Search Suggestions"
-                    embedVar.description = str(
-                        [items for items in dataMain5["results"]]
-                    ).replace("'", "")
-                    await ctx.respond(embed=embedVar)
+                    try:
+                        if len(dataMain5["results"]) == 0:
+                            raise ValueError
+                        else:
+                            embedVar = discord.Embed()
+                            embedVar.title = "Search Suggestions"
+                            embedVar.description = str(
+                                [items for items in dataMain5["results"]]
+                            ).replace("'", "")
+                            await ctx.respond(embed=embedVar)
+                    except ValueError:
+                        embedNoItemsError = discord.Embed()
+                        embedNoItemsError.description = (
+                            "Apparently there are no terms... werid huh"
+                        )
+                        await ctx.respond(embed=embedNoItemsError)
                 except Exception as e:
                     embedVar = discord.Embed()
                     embedVar.description = f"Sorry, but the search for {search_suggestion} has failed. Please try again..."
@@ -228,12 +270,22 @@ class TenorV5(commands.Cog):
                 data6 = await rep.content.read()
                 dataMain6 = parser.parse(data6, recursive=True)
                 try:
-                    embedVar = discord.Embed()
-                    embedVar.title = "Trending Search Terms"
-                    embedVar.description = str(
-                        [items for items in dataMain6["results"]]
-                    ).replace("'", "")
-                    await ctx.respond(embed=embedVar)
+                    try:
+                        if len(dataMain6["results"]) == 0:
+                            raise ValueError
+                        else:
+                            embedVar = discord.Embed()
+                            embedVar.title = "Trending Search Terms"
+                            embedVar.description = str(
+                                [items for items in dataMain6["results"]]
+                            ).replace("'", "")
+                            await ctx.respond(embed=embedVar)
+                    except ValueError:
+                        embedNoItemsError = discord.Embed()
+                        embedNoItemsError.description = (
+                            "Apparently there are no trending terms... werid huh"
+                        )
+                        await ctx.respond(embed=embedNoItemsError)
                 except Exception as e:
                     embedVar = discord.Embed()
                     embedVar.description = "Sorry, but the search for {search} has failed. Please try again..."
@@ -264,42 +316,51 @@ class TenorV6(commands.Cog):
             ) as respon:
                 data7 = await respon.content.read()
                 dataMain7 = parser.parse(data7, recursive=True)
+                embedVar = discord.Embed()
+                filterList2 = [
+                    "created",
+                    "bg_color",
+                    "content_rating",
+                    "title",
+                    "h1_title",
+                    "url",
+                    "hasaudio",
+                    "hascaption",
+                    "source_id",
+                    "composite",
+                    "media",
+                    "tags",
+                    "flags",
+                    "content_description",
+                    "shares",
+                ]
                 try:
-                    embedVar = discord.Embed()
-                    filterList2 = [
-                        "created",
-                        "bg_color",
-                        "content_rating",
-                        "title",
-                        "h1_title",
-                        "url",
-                        "hasaudio",
-                        "hascaption",
-                        "source_id",
-                        "composite",
-                        "media",
-                        "tags",
-                        "flags",
-                        "content_description",
-                        "shares",
-                    ]
-                    for dictValues in dataMain7["results"]:
-                        for k, v in dictValues.items():
-                            if k not in filterList2:
-                                embedVar.title = dictValues["content_description"]
-                                embedVar.add_field(
-                                    name=str(k).capitalize(), value=v, inline=True
-                                )
-                        for item3 in dictValues.get("media"):
-                            embedVar.set_image(url=item3["gif"]["url"])
-                        await ctx.respond(embed=embedVar)
+                    try:
+                        if len(dataMain7["results"]) == 0:
+                            raise ValueError
+                        for dictValues in dataMain7["results"]:
+                            for k, v in dictValues.items():
+                                if k not in filterList2:
+                                    embedVar.title = dictValues["content_description"]
+                                    embedVar.add_field(
+                                        name=str(k).capitalize(), value=v, inline=True
+                                    )
+                            for item3 in dictValues.get("media"):
+                                embedVar.set_image(url=item3["gif"]["url"])
+                            await ctx.respond(embed=embedVar)
+                    except ValueError:
+                        embedNoItemsError = discord.Embed()
+                        embedNoItemsError.description = (
+                            "It seems like that gif doesn't exist... Please try again"
+                        )
+                        await ctx.respond(embed=embedNoItemsError)
                 except Exception as e:
-                    embedVar = discord.Embed()
-                    embedVar.description = (
+                    embedError = discord.Embed()
+                    embedError.description = (
                         "Sorry, but the query failed. Please try again..."
                     )
-                    embedVar.add_field(name="Reason", value=e, inline=True)
-                    await ctx.respond(embed=embedVar)
+                    embedError.add_field(name="Reason", value=e, inline=True)
+                    await ctx.respond(embed=embedError)
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -329,13 +390,39 @@ class TenorV7(commands.Cog):
                 data8 = await object3.content.read()
                 dataMain8 = parser.parse(data8, recursive=True)
                 try:
-                    embedVar = discord.Embed()
-                    for dict_items in dataMain8["results"]:
-                        for _ in dict_items.items():
-                            embedVar.title = dict_items["content_description"]
-                        for item3 in dict_items.get("media"):
-                            embedVar.set_image(url=item3["gif"]["url"])
-                        await ctx.respond(embed=embedVar)
+                    try:
+                        if len(dataMain8["results"]) == 0:
+                            raise ValueError
+                        else:
+                            embedVar = discord.Embed()
+                            moreEmbedPages = pages.Paginator(
+                                pages=[
+                                    discord.Embed(
+                                        title=dictItem["content_description"]
+                                    ).set_image(
+                                        url=str(
+                                            [
+                                                item["gif"]["url"]
+                                                for item in dictItem.get("media")
+                                            ]
+                                        )
+                                        .replace("[", "")
+                                        .replace("]", "")
+                                        .replace("'", "")
+                                    )
+                                    for dictItem in dataMain8["results"]
+                                ],
+                                loop_pages=True,
+                            )
+                            await moreEmbedPages.respond(
+                                ctx.interaction, ephemeral=False
+                            )
+                    except ValueError:
+                        embedNoItemsError = discord.Embed()
+                        embedNoItemsError.description = (
+                            "Apparently there are no gifs..."
+                        )
+                        await ctx.respond(embed=embedNoItemsError)
                 except Exception as e:
                     embedVar = discord.Embed()
                     embedVar.description = (
@@ -343,6 +430,7 @@ class TenorV7(commands.Cog):
                     )
                     embedVar.add_field(name="Reason", value=e, inline=True)
                     await ctx.respond(embed=embedVar)
+
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -353,5 +441,5 @@ def setup(bot):
     bot.add_cog(TenorV3(bot))
     bot.add_cog(TenorV4(bot))
     bot.add_cog(TenorV5(bot))
-    # bot.add_cog(TenorV6(bot))
+    bot.add_cog(TenorV6(bot))
     bot.add_cog(TenorV7(bot))
