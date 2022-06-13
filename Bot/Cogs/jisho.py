@@ -3,9 +3,12 @@ import asyncio
 import aiohttp
 import discord
 import orjson
+import simdjson
 import uvloop
 from discord.commands import Option, slash_command
-from discord.ext import commands
+from discord.ext import commands, pages
+
+parser = simdjson.Parser()
 
 
 class jishoDict(commands.Cog):
@@ -30,7 +33,7 @@ class jishoDict(commands.Cog):
                 "https://jisho.org/api/v1/search/words", params=params
             ) as r:
                 jisho = await r.content.read()
-                jishoMain = orjson.loads(jisho)
+                jishoMain = parser.parse(jisho, recursive=True)
                 engDefFilter = [
                     "parts_of_speech",
                     "links",
@@ -42,59 +45,79 @@ class jishoDict(commands.Cog):
                     "info",
                     "sentences",
                 ]
-                sensesFilter = [
-                    "restrictions",
-                    "english_definitions",
-                    "sentences",
-                    "links",
-                ]
                 try:
-                    embedVar = discord.Embed()
-                    for dictItem in jishoMain["data"]:
-                        for jpnItem in dictItem["japanese"]:
-                            totalJpnItem = [value for _,
-                                            value in jpnItem.items()]
-                        for itemVal in dictItem["senses"]:
-                            for keys, value in itemVal.items():
-                                if keys not in engDefFilter:
-                                    valueItem = value
-                        for valOfItem in dictItem["senses"]:
-                            for (
-                                item3,
-                                res3,
-                            ) in valOfItem.items():
-                                if item3 not in sensesFilter:
-                                    embedVar.insert_field_at(
-                                        index=1,
-                                        name=item3,
-                                        value=str(res3).replace("'", ""),
-                                        inline=True,
+                    if len(jishoMain["data"]) == 0:
+                        raise ValueError
+                    else:
+                        mainPages = pages.Paginator(
+                            pages=[
+                                discord.Embed(
+                                    title=str(
+                                        next(
+                                            [value for _, value in jpnItem.items()]
+                                            for jpnItem in dictItem["japanese"]
+                                        )
                                     )
-                                    embedVar.remove_field(6)
-
-                        embedVar.title = (
-                            str(totalJpnItem)
-                            .replace("'", "")
-                            .replace("[", "")
-                            .replace("]", "")
+                                    .replace("'", "")
+                                    .replace("[", "")
+                                    .replace("]", ""),
+                                    description=str(
+                                        [
+                                            v
+                                            for itemVal in dictItem["senses"]
+                                            for k, v, in itemVal.items()
+                                            if k not in engDefFilter
+                                        ]
+                                    )
+                                    .replace("[", "")
+                                    .replace("]", "")
+                                    .replace("'", ""),
+                                )
+                                .add_field(
+                                    name="Parts of Speech",
+                                    value=str(
+                                        next(
+                                            (
+                                                mainItem["parts_of_speech"]
+                                                for mainItem in dictItem["senses"]
+                                            )
+                                        )
+                                    ).replace("'", ""),
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Tags",
+                                    value=str(
+                                        next(
+                                            (
+                                                mainItem["tags"]
+                                                for mainItem in dictItem["senses"]
+                                            )
+                                        )
+                                    ).replace("'", ""),
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="See Also",
+                                    value=str(
+                                        next(
+                                            (
+                                                mainItem["see_also"]
+                                                for mainItem in dictItem["senses"]
+                                            )
+                                        )
+                                    ).replace("'", ""),
+                                    inline=True,
+                                )
+                                for dictItem in jishoMain["data"]
+                            ],
+                            loop_pages=True,
                         )
-                        embedVar.description = (
-                            str(valueItem)
-                            .replace("'", "")
-                            .replace("[", "")
-                            .replace("]", "")
-                        )
-                        await ctx.respond(embed=embedVar)
-                except Exception as e:
-                    embedError = discord.Embed()
-                    embedError.description = (
-                        "There was an error with your search. Please try again"
-                    )
-                    embedError.add_field(name="Error", value=e, inline=True)
-                    embedError.add_field(
-                        name="HTTP Status Code", value=jisho.status, inline=True
-                    )
-                    await ctx.respond(embed=embedError)
+                        await mainPages.respond(ctx.interaction, ephemeral=False)
+                except ValueError:
+                    embedValError = discord.Embed()
+                    embedValError.description = f"It seems like the word `{search}` is not in the dictionary. Please try again."
+                    await ctx.respond(embed=embedValError)
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 

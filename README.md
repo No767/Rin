@@ -2,12 +2,12 @@
 
 # Rin
 
-<img src="./assets/Rin Logo V4 (GitHub).png">
+![Rin's Logo](./assets/Rin-Trans-Logo-V0.1.0.png)
 
 <br/>
 
-![GitHub Pipenv locked Python version (branch)](https://img.shields.io/github/pipenv/locked/python-version/No767/Rin/dev?label=Python&logo=python&logoColor=white) [![Top.gg Status](https://top.gg/api/widget/status/865883525932253184.png)](https://top.gg/bot/865883525932253184) 
-[![CodeQL](https://github.com/No767/Rin/actions/workflows/codeql-analysis.yml/badge.svg?branch=dev)](https://github.com/No767/Rin/actions/workflows/codeql-analysis.yml) [![Snyk](https://github.com/No767/Rin/actions/workflows/snyk.yml/badge.svg?branch=dev)](https://github.com/No767/Rin/actions/workflows/snyk.yml) [![Format](https://github.com/No767/Rin/actions/workflows/format.yml/badge.svg?branch=dev)](https://github.com/No767/Rin/actions/workflows/format.yml) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/ec2cf4ceacc746b3a4570d324c843a4b)](https://www.codacy.com/gh/No767/Rin/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=No767/Rin&amp;utm_campaign=Badge_Grade) [![Open in GitPod](https://img.shields.io/badge/Open%20in%20-GitPod-blue?logo=gitpod)](https://gitpod.io/#https://github.com/No767/Rin) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/No767/Rin?label=Release&logo=github) ![GitHub](https://img.shields.io/github/license/No767/Rin?label=License&logo=github)
+![GitHub Pipenv locked Python version (branch)](https://img.shields.io/github/pipenv/locked/python-version/No767/Rin/dev?label=Python&logo=python&logoColor=white) 
+[![CodeQL](https://github.com/No767/Rin/actions/workflows/codeql-analysis.yml/badge.svg?branch=dev)](https://github.com/No767/Rin/actions/workflows/codeql-analysis.yml) [![Snyk](https://github.com/No767/Rin/actions/workflows/snyk.yml/badge.svg?branch=dev)](https://github.com/No767/Rin/actions/workflows/snyk.yml) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/ec2cf4ceacc746b3a4570d324c843a4b)](https://www.codacy.com/gh/No767/Rin/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=No767/Rin&amp;utm_campaign=Badge_Grade) [![Open in GitPod](https://img.shields.io/badge/Open%20in%20-GitPod-blue?logo=gitpod)](https://gitpod.io/#https://github.com/No767/Rin) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/No767/Rin?label=Release&logo=github) ![GitHub](https://img.shields.io/github/license/No767/Rin?label=License&logo=github)
 
 A Discord bot focused on obtaining data from third-party services with lighting performance in mind
 
@@ -17,7 +17,11 @@ A Discord bot focused on obtaining data from third-party services with lighting 
 
 Rin is a Discord bot written with Pycord and Python, and is focused on fetching data from third-party services with lighting performance in mind. For example, you could look up some memes with the Reddit service, 
 or find your favorite anime with the MyAnimeList service. Rin supports a lot of services, such as Twitter, MangaDex, Reddit, YouTube, DeviantArt, Hypixel, and many more. Rin is also designed to be fast, and uses [Uvloop](https://github.com/MagicStack/uvloop) under the 
-hood, which is 2 times faster than Node.js and reaches the same speeds as many Go programs. For more info, please check out the [Docs](https://docs.rinbot.live/).
+hood, which is 2 times faster than Node.js and reaches the same speeds as many Go programs. On top on that, Rin is powered by the fatest JSON parser in the world, SIMDJSON. For more info, please check out the [Docs](https://docs.rinbot.live/).
+
+## Modularity
+
+Rin is designed to be modular, where you can remove cogs, or add new ones. In fact, you can build your entire bot on top of Rin, and [Kumiko](https://github.com/No767/Kumiko) basically does that. However, if you want to build your bot on top of Rin, you have to cite the bot as a fork of Rin (you are essentially using a fork of Rin if you decide to do so), link back the GitHub repo in somewhere that people will notice, and give credit to the original developer (which is me, No767).
 
 # Prefix
 
@@ -28,287 +32,247 @@ Rin's prefix is `/`.
 Via Top.gg, or any of the links in the [Bot Discovery Network](https://github.com/No767/Rin#bot-discovery-network-links) section. You can invite Rin by clicking [here](https://top.gg/bot/865883525932253184/invite). Note that previously (before v2.0.0), the prefix was `.`. Versions beyond v2.0.0 will only support the slash (`/`) prefix.
 
 # Installing Dependencies
-Getting the environment set up for the bot is a kinda complex process. Rin now uses [Uvloop](https://github.com/MagicStack/uvloop), which is a drop-in replacement for [Asyncio](https://docs.python.org/3/library/asyncio.html) and is just as fast as Node.js. Note that soon Rin will be using RustPython instead. If you want to get set up, here are the instructions to do so:
 
-## Windows
+Getting the environment set up for the bot is a kinda complex process. Rin now uses [Uvloop](https://github.com/MagicStack/uvloop), which is a drop-in replacement for [Asyncio](https://docs.python.org/3/library/asyncio.html) and is just as fast as Node.js. If you want to get set up, here are the instructions to do so:
 
-1. Install [WSL2](https://docs.microsoft.com/en-us/windows/wsl/). Uvloop does not have Windows support nor does the owner want to add it. (These instructions use Ubuntu as the main distro. If you want to build and develop Rin on a different distro, look ahead into the Linux section)
-2. Add the `software-properties-common` package first. This is required for getting `python3.10-dev` (which is the Python C Header files, required by Pycord for voice support). To do this, run this cmd:
+## Windows 
+
+1. Install [WSL2](https://docs.microsoft.com/en-us/windows/wsl/). Pick your distro of choice. In this example, we will use Ubuntu 22.04
+2. Install the suggested build dependencies for pyenv. 
 
     ```sh
-    sudo apt-get install software-properties-common
+    sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \
+    libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
+    libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev python3.10-dev git
     ```
+
+3. Install Pyenv. Also make sure to follow the instructions [here](https://github.com/pyenv/pyenv#set-up-your-shell-environment-for-pyenv)
+
+    ```sh
+    curl https://pyenv.run | bash
+    pyenv update
+    pyenv install 3.10.5
+    pyenv global 3.10.5
+    pyenv rehash
+    ```
+
+4. Restart your shell (make sure you have added it to your path and configured it either in your `.zshrc`, or `.bashrc` files)
     
-3. Make sure to install the needed packages. To do so, run this command:
-
     ```sh
-    sudo apt-get install liblzma-dev lzma libffi-dev python3.10-dev
+    exec "$SHELL"
     ```
 
-4. Install Python 3.10. Chances are the `python3.10-dev` package requires Python 3.10 as a dependency, so make sure Python 3.10 is installed. If you did it this way, you will more than likely need to get pip, and you will need to use the get-pip.py method to do so. 
-
-5. **Skip this step if you already have pip configured and installed for Python 3.10. Run `pip3.10 --version` to check if it is installed for Python 3.10**. Chances are that you don't have pip installed for Python 3.10. So you can use either cURL or wget in order to download it. In order to do so, run this cmd:
-
-    cURL:
+5. Fork and clone the repo
 
     ```sh
-    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3.10 get-pip.py
+    git clone https://github.com/[username]/Rin.git && cd Rin
     ```
 
-    wget: 
+
+6. Run Make to create the venv and install dependencies
 
     ```sh
-    wget https://bootstrap.pypa.io/get-pip.py && python3.10 get-pip.py
+    make dev-setup
     ```
-
-    After doing so, make sure to run `pip3.10 --version` to double check if it is installed correctly.
-
-6. Install [Pipenv](https://pipenv.readthedocs.io/en/latest/). To do so, run this command:
-
-    ```sh
-    sudo python3.10 -m pip install --upgrade pipenv
-    ```
-
-7. Create a fork of this repo, and then clone your fork of the repo. If you need the cmd to do so, run this cmd:
-
-    ```sh
-    git clone https://github.com/[your github username]/Rin.git
-    ```
-
-8. `cd` into the cloned repo and set up the pipenv enviroment. To do so, run this cmd:
-
-    ```sh
-    cd Rin && pipenv --python 3.10
-    ```
-
-9. And now finally install all the dependencies by running this command:
-
-    ```sh
-    pipenv install
-    ```
-
-10. (Optional) If you are using PyCharm, make sure to set the Python Interpreter to WSL and specify the Python interpreter to use. For this, the file path will be usually here:
-
-    ```sh
-    $HOME/.local/share/virtualenvs/[Project Name]/bin/python3.10
-    ```
-
-Or if you using VS Code, install the [WSL](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl) Extension for VS Code, and follow steps 1-6. Then connect to WSL. 
 
 ## Linux
-
+    
 ### Ubuntu
+
+1. Install the suggested build dependencies for pyenv. 
+
+    ```sh
+    sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \
+    libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
+    libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev python3.10-dev git
+    ```
+
+2. Install Pyenv. Also make sure to follow the instructions [here](https://github.com/pyenv/pyenv#set-up-your-shell-environment-for-pyenv)
+
+    ```sh
+    curl https://pyenv.run | bash
+    pyenv update
+    pyenv install 3.10.5
+    pyenv global 3.10.5
+    pyenv rehash
+    ```
+
+3. Restart your shell (make sure you have added it to your path and configured it either in your `.zshrc`, or `.bashrc` files)
     
-1. Add the `software-properties-common` package first. This is required for getting `python3.10-dev` (which is the Python C Header files, required by Pycord for voice support). To do this, run this cmd:
-
     ```sh
-    sudo apt-get install software-properties-common
-    ```
-    
-2. Install all of the needed packages. To do so, run this command:
-
-    ```sh
-    sudo apt-get install liblzma-dev lzma libffi-dev python3.10-dev
+    exec "$SHELL"
     ```
 
-
-4. Install Python 3.10. Chances are the `python3.10-dev` package requires Python 3.10 as a dependency, so make sure Python 3.10 is installed. If you did it this way, you will more than likely need to get pip, and you will need to use the get-pip.py method to do so. 
-
-5. **Skip this step if you already have pip configured and installed for Python 3.10. Run `pip3.10 --version` to check if it is installed for Python 3.10**. Chances are that you don't have pip installed for Python 3.10. So you can use either cURL or wget in order to download it. In order to do so, run this cmd:
-
-    cURL:
+4. Fork and clone the repo
 
     ```sh
-    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3.10 get-pip.py
+    git clone https://github.com/[username]/Rin.git && cd Rin
     ```
 
-    wget: 
+5. Run Make to create the venv and install dependencies
 
     ```sh
-    wget https://bootstrap.pypa.io/get-pip.py && python3.10 get-pip.py
-    ```
-
-    After doing so, make sure to run `pip3.10 --version` to double check if it is installed correctly.
-
-6. Install [Pipenv](https://pipenv.readthedocs.io/en/latest/). To do so, run this command:
-
-    ```sh
-    sudo python3.10 -m pip install --upgrade pipenv
-    ```
-
-7. Clone this repo. If you need the cmd to do so, run this cmd:
-
-    ```sh
-    git clone https://github.com/No767/Rin.git
-    ```
-
-8. `cd` into the cloned repo and set up the pipenv enviroment. To do so, run this cmd:
-
-    ```sh
-    cd Rin && pipenv --python 3.10
-    ```
-
-9. And now finally install all the dependencies by running this command:
-
-    ```sh
-    pipenv install
+    make dev-setup
     ```
 
 ### OpenSUSE
 
-1. Make sure to install the required packages for voice support. 
-
-   ```sh
-   sudo zypper install python310-devel libffi-devel xz-level libopenssl-devel libopenssl-1_1-devel git 
-   ```
-
-2. Install Python 3.10. You also have the choice of compiling it, but make sure you also have OpenSSL installed and all other required modules
-
-   ```sh
-   sudo zypper install python310
-   ```
-
-3. **Skip this step if you already have `pip3.10` installed. To check, run `pip3.10 --version`** Install Pip via either the `ensurepip` module or via the `get-pip.py` method
-
-   ensurepip: 
-
-   ```sh
-   python3.10 -m ensurepip
-   ```
-    cURL (for `get-pip.py`):
+1. Install the suggested build dependencies for pyenv.
 
     ```sh
-    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3.10 get-pip.py
+    sudo zypper install gcc automake bzip2 libbz2-devel xz xz-devel openssl-devel ncurses-devel \
+    readline-devel zlib-devel tk-devel libffi-devel sqlite3-devel python310-devel
     ```
 
-    wget (for `get-pip.py`): 
+2. Install Pyenv. Also make sure to follow the instructions [here](https://github.com/pyenv/pyenv#set-up-your-shell-environment-for-pyenv)
 
     ```sh
-    wget https://bootstrap.pypa.io/get-pip.py && python3.10 get-pip.py
+    curl https://pyenv.run | bash
+    pyenv update
+    pyenv install 3.10.5
+    pyenv global 3.10.5
+    pyenv rehash
     ```
 
-4. Install [Pipenv](https://pipenv.readthedocs.io/en/latest/). To do so, run this command:
+3. Restart your shell (make sure you have added it to your path and configured it either in your `.zshrc`, or `.bashrc` files)
+    
+    ```sh
+    exec "$SHELL"
+    ```
 
-   ```sh
-   sudo python3.10 -m pip install --upgrade pipenv 
-   ```
+4. Fork and clone the repo
 
-5. Go to GitHub and Fork the main repo. Then clone your fork of the repo:
+    ```sh
+    git clone https://github.com/[username]/Rin.git && cd Rin
+    ```
 
-   ```sh
-   git clone https://github.com/[your github username]/Rin
-   ```
+5. Run Make to create the venv and install dependencies
 
-6. `cd` into your newly created fork and create the env that you will be using
-
-   ```sh
-   pipenv --python 3.10
-   ```
-
-7. Install all dependencies. More than likely you will face an error installing cChardet. So just run `pipenv install cchardet` to reinstall it and it should do the trick
-
-   ```sh
-   pipenv install
-   ```
-
-8. (Optional) Create a shell by running the cmd below:
-
-   ```sh
-   pipenv shell
-   ```
+    ```sh
+    make dev-setup
+    ```
 
 ### Fedora/CentOS
 
-1. Make sure you installed the required libs (if you are using CentOS, you may have to use `yum` instead of `dnf`). To do so, run this cmd:
+1. Install the suggested build dependencies for pyenv
+
+    Fedora 22 and above:
 
     ```sh
-    sudo dnf -y groupinstall "Development Tools"
-    ```
-   
-    ```sh
-    sudo dnf install python310-devel libffi-devel openssl-devel xz-devel gcc bzip2-devel git
-    ```
-2. Install Python 3.10. You also have the choice of compiling it, but make sure you also have OpenSSL installed and all other required modules before compiling
-
-   ```sh
-   sudo dnf install python3.10
-   ```
-
-3. **Skip this step if you already have `pip3.10` installed. To check, run `pip3.10 --version`** Install Pip via either the `ensurepip` module or via the `get-pip.py` method
-
-   ensurepip: 
-
-   ```sh
-   python3.10 -m ensurepip
-   ```
-    cURL (for `get-pip.py`):
-
-    ```sh
-    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3.10 get-pip.py
+    sudo dnf install make gcc zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel tk-devel libffi-devel xz-devel python-devel git curl
     ```
 
-    wget (for `get-pip.py`): 
+    CentOS or Fedora 22 and below:
 
     ```sh
-    wget https://bootstrap.pypa.io/get-pip.py && python3.10 get-pip.py
+    sudo yum install gcc zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel tk-devel libffi-devel xz-devel python-devel git curl
+    ```
 
-4. Install [Pipenv](https://pipenv.readthedocs.io/en/latest/). To do so, run this command:
+2. Install Pyenv. Also make sure to follow the instructions [here](https://github.com/pyenv/pyenv#set-up-your-shell-environment-for-pyenv)
 
-   ```sh
-   sudo python3.10 -m pip install --upgrade pipenv 
-   ```
+    ```sh
+    curl https://pyenv.run | bash
+    pyenv update
+    pyenv install 3.10.5
+    pyenv global 3.10.5
+    pyenv rehash
+    ```
 
-5. Go to GitHub and Fork the main repo. Then clone your fork of the repo:
+3. Restart your shell (make sure you have added it to your path and configured it either in your `.zshrc`, or `.bashrc` files)
+    
+    ```sh
+    exec "$SHELL"
+    ```
 
-   ```sh
-   git clone https://github.com/[your github username]/Rin
-   ```
+4. Fork and clone the repo
 
-6. `cd` into your newly created fork and create the env that you will be using
+    ```sh
+    git clone https://github.com/[username]/Rin.git && cd Rin
+    ```
 
-   ```sh
-   pipenv --python 3.10
-   ```
+5. Run Make to create the venv and install dependencies
 
-7. Install all dependencies. More than likely you will face an error installing cChardet. So just run `pipenv install cchardet` to reinstall it and it should do the trick
+    ```sh
+    make dev-setup
+    ```
+### Arch/Manjaro
 
-   ```sh
-   pipenv install
-   ```
+1. Install the suggested build dependencies for pyenv
 
-8. (Optional) Create a shell by running the cmd below:
+    ```sh
+    sudo pacman -S --needed base-devel openssl zlib xz tk python libffi
+    ```
 
-   ```sh
-   pipenv shell
-   ```
+2. Install Pyenv. Also make sure to follow the instructions [here](https://github.com/pyenv/pyenv#set-up-your-shell-environment-for-pyenv)
+
+    ```sh
+    curl https://pyenv.run | bash
+    pyenv update
+    pyenv install 3.10.5
+    pyenv global 3.10.5
+    pyenv rehash
+    ```
+
+3. Restart your shell (make sure you have added it to your path and configured it either in your `.zshrc`, or `.bashrc` files)
+    
+    ```sh
+    exec "$SHELL"
+    ```
+
+4. Fork and clone the repo
+
+    ```sh
+    git clone https://github.com/[username]/Rin.git && cd Rin
+    ```
+
+5. Run Make to create the venv and install dependencies
+
+    ```sh
+    make dev-setup
+    ```
+
 ## MacOS
 
-**Note that I have not tested MacOS yet. If you find any errors, please let me know by submitting a GitHub Issue Report.**
+1. Install Xcode Command Line Tools (`xcode-select --install`) and [Homebrew](https://brew.sh/)
 
-1. Install Python 3.10. This can be installed with the installer or compiled from source (Or use Homebrew). Either way it doesn't matter. 
-2. Install [Pipenv](https://pipenv.readthedocs.io/en/latest/). To do so, run this command:
+2. Install the suggested build dependencies for pyenv
 
     ```sh
-    python -m pip install --upgrade pipenv
+    brew install openssl readline sqlite3 xz zlib tcl-tk git curl make
+    ```
+3. Install Pyenv via Homebrew
+
+    ```sh
+    brew update
+    brew install pyenv
     ```
 
-3. Create a fork of this repo and clone it.
-
-4. `cd` into the cloned repo and create the Pipenv. To do so, run this command: 
+4. Install Python
 
     ```sh
-    cd Rin && pipenv --python 3.10
+    pyenv update
+    pyenv install 3.10.5
+    pyenv global 3.10.5
+    pyenv rehash
     ```
 
-5. And now install all the dependencies by running this command:
+5. Follow the rest of the steps, starting on [Set Up Your shell Environment For Pyenv](https://github.com/pyenv/pyenv#set-up-your-shell-environment-for-pyenv)
+
+5. Fork and clone the repo
 
     ```sh
-    pipenv install
+    git clone https://github.com/[username]/Rin.git && cd Rin
+    ```
+
+6. Run Make to create the venv and install dependencies
+
+    ```sh
+    make dev-setup
     ```
 
 # Licensing
 
-Rin is licensed under Apache-2.0. This project uses some of the cogs from EasyBot.py and its plugins. All EasyBot.py and EasyBot-Plugin code is licensed under CC0-1.0, and all private code changes is licensed under Apache-2.0. 
+All of Rin's code is licensed under Apache-2.0
 
 # Contributing
 
