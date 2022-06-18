@@ -363,7 +363,7 @@ class AniListV3(commands.Cog):
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-class AniListV3(commands.Cog):
+class AniListV4(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         
@@ -454,3 +454,6 @@ class AniListV3(commands.Cog):
 
 def setup(bot):
     bot.add_cog(AniListV1(bot))
+    bot.add_cog(AniListV2(bot))
+    bot.add_cog(AniListV3(bot))
+    bot.add_cog(AniListV4(bot))
