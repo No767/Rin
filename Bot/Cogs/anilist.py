@@ -2,7 +2,7 @@ import asyncio
 
 import discord
 import uvloop
-from discord.commands import Option, SlashCommandGroup, slash_command
+from discord.commands import Option, slash_command
 from discord.ext import commands, pages
 from exceptions import NoItemsError
 from gql import Client, gql
@@ -11,9 +11,6 @@ from gql.transport.aiohttp import AIOHTTPTransport
 class AniListV1(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    anilist = SlashCommandGroup("anilist", "Commands for AniList service")
-    anilistSearch = anilist.create_subgroup("search", "Search for anime on AniList")
 
     @slash_command(name="anilist-anime", description="Searches for up to 25 animes on AniList")
     async def aniListSearchAnime(
