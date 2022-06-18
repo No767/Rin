@@ -134,4 +134,4 @@ class DiscordBotsV2(commands.Cog):
 
 def setup(bot):
     bot.add_cog(DiscordBotsV1(bot))
-    bot.add_cog(DiscordBotsV2(bot))
+    # bot.add_cog(DiscordBotsV2(bot))

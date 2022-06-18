@@ -441,5 +441,5 @@ def setup(bot):
     bot.add_cog(TenorV3(bot))
     bot.add_cog(TenorV4(bot))
     bot.add_cog(TenorV5(bot))
-    bot.add_cog(TenorV6(bot))
+    # bot.add_cog(TenorV6(bot))
     bot.add_cog(TenorV7(bot))

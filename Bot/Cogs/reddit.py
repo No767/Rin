@@ -59,7 +59,7 @@ class RedditV1(commands.Cog):
                 submission = post
                 reddit_embed = discord.Embed(
                     color=discord.Color.from_rgb(255, 69, 0))
-                reddit_embed.description = f"{self.bot.user.name} found this post in r/{submission.subreddit.display_name} by {submission.author.name} when searching {original_search}"
+                reddit_embed.description = f"{self.bot.user.name} found this post in r/{submission.subreddit.display_name} by {submission.author.name} when searching {original_search} ({submission.url})"
                 reddit_embed.set_image(url=submission.url)
                 await ctx.respond(embed=reddit_embed)
             except Exception as e:
@@ -77,7 +77,7 @@ class RedditV2(commands.Cog):
 
     @slash_command(
         name="reddit-new",
-        description="Returns 5 new posts from any subreddit",
+        description="Returns 1 new posts from any subreddit",
     )
     async def redditNew(
         self, ctx, *, subreddit: Option(str, "The subreddit to search")
@@ -93,7 +93,7 @@ class RedditV2(commands.Cog):
             else:
                 sub = subreddit
             mainSub = await redditapi.subreddit(sub)
-            async for submission in mainSub.new(limit=5):
+            async for submission in mainSub.new(limit=1):
                 await submission.author.load()
                 embedVar = discord.Embed()
                 embedVar.title = submission.title

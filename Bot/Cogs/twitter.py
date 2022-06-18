@@ -22,12 +22,12 @@ class TwitterV1(commands.Cog):
 
     @slash_command(
         name="twitter-search",
-        description="Returns up to 5 recent tweets given the Twitter user",
+        description="Returns up to 1 recent tweets given the Twitter user",
     )
     async def twitter_search(self, ctx, *, user: str):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {"Authorization": f"Bearer {Bearer_Token}"}
-            params = {"q": f"from:{user}", "count": 5}
+            params = {"q": f"from:{user}", "count": 1}
             async with session.get(
                 "https://api.twitter.com/1.1/search/tweets.json",
                 headers=headers,

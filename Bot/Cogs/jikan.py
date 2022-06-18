@@ -17,11 +17,11 @@ class JikanV1(commands.Cog):
 
     @slash_command(
         name="jikan-anime",
-        description="Fetches up to 3 anime from MAL",
+        description="Fetches up to 1 anime from MAL",
     )
     async def anime(self, ctx, *, anime_name: Option(str, "Name of the anime")):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            params = {"limit": 3, "q": anime_name,
+            params = {"limit": 1, "q": anime_name,
                       "sfw": "true", "order_by": "title"}
             async with session.get(
                 "https://api.jikan.moe/v4/anime/", params=params
@@ -98,11 +98,11 @@ class JikanV2(commands.Cog):
 
     @slash_command(
         name="jikan-manga",
-        description="Fetches up to 3 mangas from MAL",
+        description="Fetches up to 1 mangas from MAL",
     )
     async def manga(self, ctx, *, manga_name: Option(str, "Name of the manga")):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            params = {"limit": 3, "q": manga_name,
+            params = {"limit": 1, "q": manga_name,
                       "sfw": "true", "order_by": "title"}
             async with session.get(
                 "https://api.jikan.moe/v4/manga", params=params

@@ -29,7 +29,7 @@ class YoutubeV1(commands.Cog):
 
     @slash_command(
         name="youtube-search",
-        description="Finds up to 3 videos on YouTube based on the given search term",
+        description="Finds up to 1 videos on YouTube based on the given search term",
     )
     async def youtube_search(self, ctx, *, search: Option(str, "Video Search Term")):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
@@ -37,7 +37,7 @@ class YoutubeV1(commands.Cog):
                 "key": YouTube_API_Key,
                 "part": "snippet",
                 "type": "video",
-                "maxResults": "3",
+                "maxResults": "1",
                 "q": search,
                 "channelType": "any",
                 "videoLicense": "any",
@@ -194,7 +194,7 @@ class YoutubeV3(commands.Cog):
 
     @slash_command(
         name="youtube-playlists",
-        description="Returns up to 3 YouTube playlists based on the given YT channel",
+        description="Returns up to 1 YouTube playlists based on the given YT channel",
     )
     async def youtube_playlists(
         self, ctx, *, channel_name: Option(str, "Channel Name")
@@ -221,7 +221,7 @@ class YoutubeV3(commands.Cog):
                             "key": YouTube_API_Key,
                             "part": "snippet,contentDetails",
                             "channelId": channel_id,
-                            "maxResults": 3,
+                            "maxResults": 1,
                         }
                         async with session.get(
                             "https://www.googleapis.com/youtube/v3/playlists",
@@ -467,5 +467,5 @@ def setup(bot):
     bot.add_cog(YoutubeV1(bot))
     bot.add_cog(YoutubeV2(bot))
     bot.add_cog(YoutubeV3(bot))
-    bot.add_cog(YoutubeV4(bot))
-    bot.add_cog(YoutubeV5(bot))
+    # bot.add_cog(YoutubeV4(bot))
+    # bot.add_cog(YoutubeV5(bot))

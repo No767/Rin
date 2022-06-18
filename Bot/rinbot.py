@@ -19,11 +19,9 @@ initial_extensions = [
     "Cogs.reddit",
     "Cogs.mcsrvstats",
     "Cogs.waifu-generator",
-    "Cogs.hypixel",
     "Cogs.waifu-pics",
     "Cogs.advice",
     "Cogs.jikan",
-    "Cogs.top-gg",
     "Cogs.global-error-handling",
     "Cogs.rininvite",
     "Cogs.version",
@@ -36,6 +34,8 @@ initial_extensions = [
     "Cogs.modrinth",
     "Cogs.discord-bots",
     "Cogs.legacy-help",
+    "Cogs.jisho",
+    "Cogs.anilist"
 ]
 for extension in initial_extensions:
     bot.load_extension(extension)

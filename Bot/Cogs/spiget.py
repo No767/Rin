@@ -17,7 +17,7 @@ class SpigetV2(commands.Cog):
 
     @slash_command(
         name="spiget-search",
-        description="Finds up to 3 plugins matching the name of the given plugin",
+        description="Finds up to 1 plugins matching the name of the given plugin",
     )
     async def spigetSearch(
         self, ctx, *, plugin_name: Option(str, "The name of the plugin")
@@ -26,7 +26,7 @@ class SpigetV2(commands.Cog):
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36"
             }
-            params = {"size": 3}
+            params = {"size": 1}
             async with session.get(
                 f"https://api.spiget.org/v2/search/resources/{plugin_name}",
                 headers=headers,

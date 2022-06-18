@@ -5,3 +5,4 @@ This version is a really stripped down version of Rin. It's intended for use in 
 # Changes
 - disabled a ton of commands...
 - Added actual exception handling
+- Added AniList API Support

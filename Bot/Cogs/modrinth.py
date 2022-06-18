@@ -17,7 +17,7 @@ class ModrinthV1(commands.Cog):
 
     @slash_command(
         name="modrinth-search",
-        description="Searches for up to 3 mods on Modrinth",
+        description="Searches for up to 1 mods on Modrinth",
     )
     async def modrinthSearch(
         self,
@@ -29,7 +29,7 @@ class ModrinthV1(commands.Cog):
             params = {
                 "query": mod,
                 "index": "relevance",
-                "limit": 3,
+                "limit": 1,
             }
             async with session.get(
                 "https://api.modrinth.com/v2/search", params=params
@@ -428,7 +428,7 @@ class ModrinthV8(commands.Cog):
 
 def setup(bot):
     bot.add_cog(ModrinthV1(bot))
-    bot.add_cog(ModrinthV2(bot))
+    # bot.add_cog(ModrinthV2(bot))
     # bot.add_cog(ModrinthV3(bot)) # Disabled due to spam issues
     # bot.add_cog(ModrinthV4(bot))
     # bot.add_cog(ModrinthV5(bot)) # Unable to handle exceptions
