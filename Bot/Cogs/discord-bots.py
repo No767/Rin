@@ -21,7 +21,7 @@ class DiscordBotsV1(commands.Cog):
 
     @slash_command(
         name="discord-bots-search",
-        description="Searches for any Discord Bots listed on discord.bots.gg",
+        description="Searches for up to 1 of any Discord Bots listed on discord.bots.gg",
     )
     async def discordBotsSearch(
         self,
@@ -36,7 +36,7 @@ class DiscordBotsV1(commands.Cog):
     ):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {"Authorization": apiKey}
-            params = {"q": search, "sort": sort, "limit": 3}
+            params = {"q": search, "sort": sort, "limit": 1}
             async with session.get(
                 "https://discord.bots.gg/api/v1/bots", headers=headers, params=params
             ) as r:
