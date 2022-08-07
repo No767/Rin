@@ -5,11 +5,12 @@ import discord
 import orjson
 import simdjson
 import uvloop
+from dateutil import parser
 from discord.commands import Option, SlashCommandGroup
 from discord.ext import commands, pages
-from exceptions import HTTPException, NoItemsError
+from rin_exceptions import HTTPException, NoItemsError, NotFoundHTTPException
 
-parser = simdjson.Parser()
+jsonParser = simdjson.Parser()
 
 
 class MALV1(commands.Cog):
@@ -17,162 +18,192 @@ class MALV1(commands.Cog):
         self.bot = bot
 
     mal = SlashCommandGroup("mal", "Commands for the MyAnimeList/Jikan service")
+    malSearch = mal.create_subgroup("search", "Search for anime/manga on MyAnimeList")
     malSeasons = mal.create_subgroup("seasons", "Sub commands for anime seasons")
     malRandom = mal.create_subgroup("random", "Random Anime/Manga Commands")
 
-    @mal.command(name="anime")
+    @malSearch.command(name="anime")
     async def anime(self, ctx, *, anime_name: Option(str, "Name of the anime")):
-        """Fetches up to 5 anime from MAL"""
+        """Fetches up to 25 anime from MAL"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            params = {"limit": 5, "q": anime_name, "sfw": "true", "order_by": "title"}
+            params = {"limit": 25, "q": anime_name, "sfw": "true", "order_by": "title"}
             async with session.get(
                 "https://api.jikan.moe/v4/anime/", params=params
             ) as r:
                 data = await r.content.read()
-                dataMain = parser.parse(data, recursive=True)
-                filterList = [
-                    "images",
-                    "title",
-                    "aired",
-                    "synopsis",
-                    "background",
-                    "broadcast",
-                    "producers",
-                    "licensors",
-                    "studios",
-                    "genres",
-                    "explicit_genres",
-                    "themes",
-                    "demographics",
-                    "trailer",
-                ]
+                dataMain = jsonParser.parse(data, recursive=True)
                 try:
                     if len(dataMain["data"]) == 0:
-                        raise ValueError
+                        raise NoItemsError
                     else:
-                        for dictItem in dataMain["data"]:
-                            embedVar = discord.Embed()
-                            embedVar.title = dictItem["title"]
-                            embedVar.description = dictItem["synopsis"]
-                            for key, value in dictItem.items():
-                                if key not in filterList:
-                                    embedVar.add_field(
-                                        name=str(key).replace("_", " ").capitalize(),
-                                        value=value,
-                                        inline=True,
-                                    )
-                            for item in dictItem["genres"]:
-                                embedVar.add_field(
+                        mainPages = pages.Paginator(
+                            pages=[
+                                discord.Embed(
+                                    title=f'{mainItem["title"]}',
+                                    description=mainItem["synopsis"],
+                                )
+                                .add_field(
+                                    name="Japanese Title",
+                                    value=mainItem["title_japanese"],
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Score", value=mainItem["score"], inline=True
+                                )
+                                .add_field(
+                                    name="Rating", value=mainItem["rating"], inline=True
+                                )
+                                .add_field(
+                                    name="MAL Rank", value=mainItem["rank"], inline=True
+                                )
+                                .add_field(
+                                    name="Aired",
+                                    value=mainItem["aired"]["string"],
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Num of Episodes",
+                                    value=mainItem["episodes"],
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Season", value=mainItem["season"], inline=True
+                                )
+                                .add_field(
+                                    name="Year", value=mainItem["year"], inline=True
+                                )
+                                .add_field(
+                                    name="Alternative Titles",
+                                    value=str(
+                                        [
+                                            titleItems["title"]
+                                            for titleItems in mainItem["titles"]
+                                        ]
+                                        if len(mainItem["title"]) > 0
+                                        else ["None"]
+                                    ).replace("'", ""),
+                                )
+                                .add_field(
                                     name="Genres",
-                                    value=f'[{item["name"]}]',
+                                    value=str(
+                                        [items["name"] for items in mainItem["genres"]]
+                                    ).replace("'", ""),
                                     inline=True,
                                 )
-                            for item2 in dictItem["demographics"]:
-                                embedVar.add_field(
-                                    name="Demographics",
-                                    value=f'[{item2["name"]}]',
-                                    inline=True,
-                                )
-                            for item3 in dictItem["themes"]:
-                                embedVar.add_field(
+                                .add_field(
                                     name="Themes",
-                                    value=f'[{item3["name"]}]',
+                                    value=str(
+                                        [items["name"] for items in mainItem["themes"]]
+                                    ).replace("'", ""),
                                     inline=True,
                                 )
-                            embedVar.add_field(
-                                name="Aired",
-                                value=dictItem["aired"]["string"],
-                                inline=True,
-                            )
-                            embedVar.set_image(
-                                url=dictItem["images"]["jpg"]["large_image_url"]
-                            )
-                            await ctx.respond(embed=embedVar)
-                except ValueError:
+                                .add_field(
+                                    name="MAL URL", value=mainItem["url"], inline=True
+                                )
+                                .set_image(
+                                    url=mainItem["images"]["jpg"]["large_image_url"]
+                                )
+                                for mainItem in dataMain["data"]
+                            ],
+                            loop_pages=True,
+                        )
+                        await mainPages.respond(ctx.interaction, ephemeral=False)
+                except NoItemsError:
                     embedVar = discord.Embed()
                     embedVar.description = "Sorry, but the anime you searched for either wasn't found or doesn't exist. Please try again"
                     await ctx.respond(embed=embedVar)
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-    @mal.command(name="manga")
+    @malSearch.command(name="manga")
     async def manga(self, ctx, *, manga_name: Option(str, "Name of the manga")):
-        """Fetches up to 5 mangas from MAL"""
+        """Fetches up to 25 mangas from MAL"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            params = {"limit": 5, "q": manga_name, "sfw": "true", "order_by": "title"}
+            params = {"limit": 25, "q": manga_name, "sfw": "true", "order_by": "title"}
             async with session.get(
                 "https://api.jikan.moe/v4/manga", params=params
             ) as response:
                 data = await response.content.read()
-                dataMain2 = parser.parse(data, recursive=True)
-                filterList = [
-                    "title",
-                    "images",
-                    "published",
-                    "authors",
-                    "serializations",
-                    "genres",
-                    "explicit_genres",
-                    "themes",
-                    "demographics",
-                    "background",
-                    "synopsis",
-                ]
+                dataMain2 = jsonParser.parse(data, recursive=True)
                 try:
                     if len(dataMain2["data"]) == 0:
-                        raise ValueError
+                        raise NoItemsError
                     else:
-                        for dataItem in dataMain2["data"]:
-                            embedVar = discord.Embed()
-                            embedVar.title = dataItem["title"]
-                            embedVar.description = dataItem["synopsis"]
-                            embedVar.set_image(
-                                url=dataItem["images"]["jpg"]["large_image_url"]
-                            )
-                            for key, value in dataItem.items():
-                                if key not in filterList:
-                                    embedVar.add_field(
-                                        name=str(key).replace("_", " ").capitalize(),
-                                        value=value,
-                                        inline=True,
-                                    )
-                            for name in dataItem["authors"]:
-                                embedVar.add_field(
-                                    name="Authors",
-                                    value=f'[{name["name"]}]',
+                        mainPages = pages.Paginator(
+                            pages=[
+                                discord.Embed(
+                                    title=dataItem["title"],
+                                    description=dataItem["synopsis"],
+                                )
+                                .add_field(
+                                    name="Japanese Title",
+                                    value=dataItem["title_japanese"],
                                     inline=True,
                                 )
-                            for obj in dataItem["serializations"]:
-                                embedVar.add_field(
-                                    name="Serializations",
-                                    value=f'[{obj["name"]}]',
+                                .add_field(
+                                    name="Chapters",
+                                    value=dataItem["chapters"],
                                     inline=True,
                                 )
-                            for genre in dataItem["genres"]:
-                                embedVar.add_field(
+                                .add_field(
+                                    name="Volumes",
+                                    value=dataItem["volumes"],
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Status", value=dataItem["status"], inline=True
+                                )
+                                .add_field(
+                                    name="Published Time",
+                                    value=dataItem["published"]["string"],
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="MAL Score",
+                                    value=dataItem["score"],
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="MAL Rank", value=dataItem["rank"], inline=True
+                                )
+                                .add_field(
+                                    name="Alternative Titles",
+                                    value=str(
+                                        [
+                                            titleItems["title"]
+                                            for titleItems in dataItem["titles"]
+                                        ]
+                                        if len(dataItem["title"]) > 0
+                                        else ["None"]
+                                    ).replace("'", ""),
+                                    inline=True,
+                                )
+                                .add_field(
                                     name="Genres",
-                                    value=f'[{genre["name"]}]',
+                                    value=str(
+                                        [items["name"] for items in dataItem["genres"]]
+                                    ).replace("'", ""),
                                     inline=True,
                                 )
-                            for theme in dataItem["themes"]:
-                                embedVar.add_field(
+                                .add_field(
                                     name="Themes",
-                                    value=f'[{theme["name"]}]',
+                                    value=str(
+                                        [items["name"] for items in dataItem["themes"]]
+                                    ).replace("'", ""),
                                     inline=True,
                                 )
-                            for demographic in dataItem["demographics"]:
-                                embedVar.add_field(
-                                    name="Demographics",
-                                    value=f'[{demographic["name"]}]',
-                                    inline=True,
+                                .add_field(
+                                    name="MAL URL", value=dataItem["url"], inline=True
                                 )
-                            embedVar.add_field(
-                                name="Published",
-                                value=dataItem["published"]["string"],
-                                inline=True,
-                            )
-                            await ctx.respond(embed=embedVar)
-                except ValueError:
+                                .set_image(
+                                    url=dataItem["images"]["jpg"]["large_image_url"]
+                                )
+                                for dataItem in dataMain2["data"]
+                            ],
+                            loop_pages=True,
+                        )
+                        await mainPages.respond(ctx.interaction, ephemeral=False)
+                except NoItemsError:
                     embedVar = discord.Embed()
                     embedVar.description = "Sorry, but it seems like that manga cannot be found. Please try again"
                     await ctx.respond(embed=embedVar)
@@ -185,7 +216,7 @@ class MALV1(commands.Cog):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             async with session.get("https://api.jikan.moe/v4/random/anime") as response:
                 data = await response.content.read()
-                dataMain = parser.parse(data, recursive=True)
+                dataMain = jsonParser.parse(data, recursive=True)
                 mainFilter = [
                     "images",
                     "trailer",
@@ -201,6 +232,10 @@ class MALV1(commands.Cog):
                     "title",
                     "broadcast",
                     "background",
+                    "titles",
+                    "title_synonyms",
+                    "mal_id",
+                    "approved",
                 ]
                 try:
                     if len(dataMain["data"]) == 0:
@@ -216,6 +251,13 @@ class MALV1(commands.Cog):
                                     value=value,
                                     inline=True,
                                 )
+                        embedVar.add_field(
+                            name="Titles",
+                            value=str(
+                                [items["title"] for items in dataMain["data"]["titles"]]
+                            ).replace("'", ""),
+                            inline=True,
+                        )
                         embedVar.set_image(
                             url=dataMain["data"]["images"]["jpg"]["large_image_url"]
                         )
@@ -236,7 +278,7 @@ class MALV1(commands.Cog):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             async with session.get("https://api.jikan.moe/v4/random/manga") as r:
                 data = await r.content.read()
-                dataMain3 = parser.parse(data, recursive=True)
+                dataMain3 = jsonParser.parse(data, recursive=True)
                 mangaFilter = [
                     "title",
                     "published",
@@ -250,6 +292,10 @@ class MALV1(commands.Cog):
                     "images",
                     "background",
                     "synopsis",
+                    "titles",
+                    "mal_id",
+                    "approved",
+                    "title_synonyms",
                 ]
                 embedVar = discord.Embed()
                 try:
@@ -265,6 +311,16 @@ class MALV1(commands.Cog):
                                     value=value,
                                     inline=True,
                                 )
+                        embedVar.add_field(
+                            name="Titles",
+                            value=str(
+                                [
+                                    items["title"]
+                                    for items in dataMain3["data"]["titles"]
+                                ]
+                            ).replace("'", ""),
+                            inline=True,
+                        )
                         embedVar.set_image(
                             url=dataMain3["data"]["images"]["jpg"]["large_image_url"]
                         )
@@ -283,15 +339,20 @@ class MALV1(commands.Cog):
         ctx,
         year: Option(int, "Which year for the season"),
         *,
-        season: Option(str, "Anime Season - Winter, Spring, Summer or Fall"),
+        season: Option(
+            str,
+            "Anime Season - Winter, Spring, Summer or Fall",
+            choices=["Winter", "Spring", "Summer", "Fall"],
+            default="winter",
+        ),
     ):
         """Returns animes for the given season and year"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             async with session.get(
-                f"https://api.jikan.moe/v4/seasons/{year}/{season}"
+                f"https://api.jikan.moe/v4/seasons/{year}/{str(season).lower()}"
             ) as response:
                 seasons = await response.content.read()
-                seasonsMain = parser.parse(seasons, recursive=True)
+                seasonsMain = jsonParser.parse(seasons, recursive=True)
                 try:
                     try:
                         if response.status == 400:
@@ -392,7 +453,7 @@ class MALV1(commands.Cog):
             ) as full_response:
                 try:
                     data = await full_response.content.read()
-                    dataMain5 = parser.parse(data, recursive=True)
+                    dataMain5 = jsonParser.parse(data, recursive=True)
                     mainPages = pages.Paginator(
                         pages=[
                             discord.Embed(
@@ -457,25 +518,57 @@ class MALV1(commands.Cog):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             async with session.get(f"https://api.jikan.moe/v4/users/{username}") as r:
                 data = await r.content.read()
-                dataMain6 = parser.parse(data, recursive=True)
-                userFilter = ["username", "images"]
+                dataMain6 = jsonParser.parse(data, recursive=True)
+                userFilter = [
+                    "username",
+                    "images",
+                    "mal_id",
+                    "joined",
+                    "last_online",
+                    "birthday",
+                ]
                 try:
-                    embedVar = discord.Embed()
-                    embedVar.title = dataMain6["data"]["username"]
-                    embedVar.set_thumbnail(
-                        url=dataMain6["data"]["images"]["jpg"]["image_url"]
+                    if r.status == 404 or r.status == 400:
+                        raise NotFoundHTTPException
+                    else:
+                        embedVar = discord.Embed()
+                        embedVar.title = dataMain6["data"]["username"]
+                        embedVar.set_thumbnail(
+                            url=dataMain6["data"]["images"]["jpg"]["image_url"]
+                        )
+                        for key, value in dataMain6["data"].items():
+                            if key not in userFilter:
+                                embedVar.add_field(name=key, value=value, inline=True)
+                        embedVar.add_field(
+                            name="birthday",
+                            value=parser.isoparse(
+                                dataMain6["data"]["birthday"]
+                            ).strftime("%Y-%m-%d %H:%M:%S")
+                            if dataMain6["data"]["birthday"] is not None
+                            else "None",
+                            inline=True,
+                        )
+                        embedVar.add_field(
+                            name="joined",
+                            value=parser.isoparse(dataMain6["data"]["joined"]).strftime(
+                                "%Y-%m-%d %H:%M:%S"
+                            ),
+                            inline=True,
+                        )
+                        embedVar.add_field(
+                            name="last_online",
+                            value=parser.isoparse(
+                                dataMain6["data"]["last_online"]
+                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                            inline=True,
+                        )
+                        await ctx.respond(embed=embedVar)
+                except NotFoundHTTPException:
+                    await ctx.respond(
+                        embed=discord.Embed(
+                            description="Sadly the requested user can't be found. Please try again"
+                        )
                     )
-                    for key, value in dataMain6["data"].items():
-                        if key not in userFilter:
-                            embedVar.add_field(name=key, value=value, inline=True)
-
-                    await ctx.respond(embed=embedVar)
-                except Exception as e:
-                    embedVar.description = (
-                        "The query could not be done. Please try again"
-                    )
-                    embedVar.add_field(name="Reason", value=e, inline=True)
-                    await ctx.respond(embed=embedVar)
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 

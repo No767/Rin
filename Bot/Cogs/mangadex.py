@@ -5,11 +5,12 @@ import discord
 import orjson
 import simdjson
 import uvloop
+from dateutil import parser
 from discord.commands import Option, SlashCommandGroup
 from discord.ext import commands, pages
-from exceptions import NotFoundHTTPException
+from rin_exceptions import NoItemsError
 
-parser = simdjson.Parser()
+jsonParser = simdjson.Parser()
 
 
 class List(list):
@@ -25,122 +26,142 @@ class MangaDexV1(commands.Cog):
         self.bot = bot
 
     md = SlashCommandGroup("mangadex", "Commmands for the MangaDex service")
+    mdSearch = md.create_subgroup("search", "Search for stuff on MangaDex")
     mdScanlation = md.create_subgroup(
         "scanlation", "Commands for the scanlation section"
     )
 
-    @md.command(name="search")
+    @mdSearch.command(name="manga")
     async def manga(self, ctx, *, manga: Option(str, "Name of Manga")):
-        """Searches for up to 5 manga on MangaDex"""
+        """Searches for up to 25 manga on MangaDex"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             params = {
                 "title": manga,
                 "publicationDemographic[]": "none",
                 "contentRating[]": "safe",
                 "order[title]": "asc",
-                "limit": 5,
+                "limit": 25,
+                "includes[]": "cover_art",
             }
             async with session.get(
                 f"https://api.mangadex.org/manga/", params=params
             ) as r:
                 data = await r.content.read()
-                dataMain = parser.parse(data, recursive=True)
-                embedVar = discord.Embed()
-                mangaFilter = [
-                    "tags",
-                    "title",
-                    "altTitles",
-                    "description",
-                    "links",
-                    "background",
-                ]
+                dataMain = jsonParser.parse(data, recursive=True)
                 try:
-                    try:
-                        if len(dataMain["data"]) == 0:
-                            raise ValueError
-                        else:
-                            for dictItem in dataMain["data"]:
-                                mangaID = dictItem["id"]
-                                mangaTitle = [
-                                    val6
-                                    for _, val6 in dictItem["attributes"][
-                                        "title"
-                                    ].items()
-                                ]
-                                mainDesc = [
-                                    val7
-                                    for _, val7 in dictItem["attributes"][
-                                        "description"
-                                    ].items()
-                                ]
-                                for k, v in dictItem["attributes"].items():
-                                    if k not in mangaFilter:
-                                        embedVar.add_field(
-                                            name=k, value=f"[{v}]", inline=True
-                                        )
-                                for item in dictItem["attributes"]["tags"]:
-                                    embedVar.add_field(
-                                        name="Tags",
-                                        value=f'[{item["attributes"]["name"]["en"]}]',
-                                        inline=True,
-                                    )
-                                for item1, res in dictItem["attributes"][
-                                    "links"
-                                ].items():
-                                    embedVar.add_field(
-                                        name=item1, value=f"[{res}]", inline=True
-                                    )
-                                for titles in dictItem["attributes"]["altTitles"]:
-                                    for keys, values in titles.items():
-                                        embedVar.add_field(
-                                            name=keys, value=f"[{values}]", inline=True
-                                        )
-                                for item in dictItem["relationships"]:
-                                    if item["type"] not in [
-                                        "manga",
-                                        "author",
-                                        "artist",
-                                    ]:
-                                        coverArtID = item["id"]
-                                        async with session.get(
-                                            f"https://api.mangadex.org/cover/{coverArtID}"
-                                        ) as rp:
-                                            cover_art_data = await rp.json(
-                                                loads=orjson.loads
+                    if len(dataMain["data"]) == 0:
+                        raise NoItemsError
+                    else:
+                        mainPages = pages.Paginator(
+                            pages=[
+                                discord.Embed(
+                                    title=mainItem["attributes"]["title"]["en"]
+                                    if "en" in mainItem["attributes"]["title"]
+                                    else mainItem["attributes"]["title"],
+                                    description=mainItem["attributes"]["description"][
+                                        "en"
+                                    ]
+                                    if "en" in mainItem["attributes"]["description"]
+                                    else mainItem["attributes"]["description"],
+                                )
+                                .add_field(
+                                    name="Original Language",
+                                    value=f'[{mainItem["attributes"]["originalLanguage"]}]',
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Last Volume",
+                                    value=f'[{mainItem["attributes"]["lastVolume"]}]',
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Last Chapter",
+                                    value=f'[{mainItem["attributes"]["lastChapter"]}]',
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Status",
+                                    value=f'[{mainItem["attributes"]["status"]}]',
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Year",
+                                    value=f'[{mainItem["attributes"]["year"]}]',
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Content Rating",
+                                    value=f'[{mainItem["attributes"]["contentRating"]}]',
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Created At",
+                                    value=parser.isoparse(
+                                        mainItem["attributes"]["createdAt"]
+                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Last Updated At",
+                                    value=parser.isoparse(
+                                        mainItem["attributes"]["updatedAt"]
+                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Available Translated Language",
+                                    value=f'{mainItem["attributes"]["availableTranslatedLanguages"]}'.replace(
+                                        "'", ""
+                                    ),
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Tags",
+                                    value=str(
+                                        [
+                                            str(
+                                                [
+                                                    val
+                                                    for _, val in items["attributes"][
+                                                        "name"
+                                                    ].items()
+                                                ]
                                             )
-                                            cover_art = cover_art_data["data"][
-                                                "attributes"
-                                            ]["fileName"]
-                                            embedVar.set_image(
-                                                url=f"https://uploads.mangadex.org/covers/{mangaID}/{cover_art}"
-                                            )
-                                embedVar.title = (
-                                    str(mangaTitle)
+                                            .replace("[", "")
+                                            .replace("]", "")
+                                            .replace("'", "")
+                                            for items in mainItem["attributes"]["tags"]
+                                        ]
+                                    ).replace("'", ""),
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="MangaDex URL",
+                                    value=f'https://mangadex.org/title/{mainItem["id"]}',
+                                    inline=True,
+                                )
+                                .set_image(
+                                    url=str(
+                                        [
+                                            f'https://uploads.mangadex.org/covers/{mainItem["id"]}/{items["attributes"]["fileName"]}'
+                                            for items in mainItem["relationships"]
+                                            if items["type"]
+                                            not in ["manga", "author", "artist"]
+                                        ]
+                                    )
                                     .replace("'", "")
                                     .replace("[", "")
                                     .replace("]", "")
                                 )
-                                embedVar.description = (
-                                    str(mainDesc)
-                                    .replace("'", "")
-                                    .replace("[", "")
-                                    .replace("]", "")
-                                )
-                                await ctx.respond(embed=embedVar)
-                    except ValueError:
-                        embedErrorAlt2 = discord.Embed()
-                        embedErrorAlt2.description = "Sorry, but the manga you searched for does not exist or is invalid. Please try again."
-                        await ctx.respond(embed=embedErrorAlt2)
-                except Exception as e:
-                    embedErrorAlt = discord.Embed()
-                    embedErrorAlt.description = (
-                        "Sorry, but there was an error. Please try again."
-                    )
-                    embedErrorAlt.add_field(name="Reason", value=e, inline=True)
-                    embedErrorAlt.add_field(
-                        name="HTTP Response Code", value=r.status, inline=True
-                    )
-                    await ctx.respond(embed=embedErrorAlt)
+                                for mainItem in dataMain["data"]
+                            ],
+                            loop_pages=True,
+                        )
+                        await mainPages.respond(ctx.interaction, ephemeral=False)
+                except NoItemsError:
+                    embedErrorAlt2 = discord.Embed()
+                    embedErrorAlt2.description = "Sorry, but the manga you searched for does not exist or is invalid. Please try again."
+                    await ctx.respond(embed=embedErrorAlt2)
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -150,7 +171,7 @@ class MangaDexV1(commands.Cog):
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             async with session.get("https://api.mangadex.org/manga/random") as r:
                 data2 = await r.content.read()
-                dataMain2 = parser.parse(data2, recursive=True)
+                dataMain2 = jsonParser.parse(data2, recursive=True)
                 mangaFilter2 = [
                     "tags",
                     "title",
@@ -158,6 +179,8 @@ class MangaDexV1(commands.Cog):
                     "description",
                     "links",
                     "background",
+                    "createdAt",
+                    "updatedAt",
                 ]
                 tagFilter = ["id", "type", "relationships"]
                 embedVar = discord.Embed()
@@ -173,27 +196,22 @@ class MangaDexV1(commands.Cog):
                         elif len(dataMain2["data"]) == 0:
                             raise ValueError
                         else:
-                            mangaTitle2 = [
-                                val8
-                                for _, val8 in dataMain2["data"]["attributes"][
-                                    "title"
-                                ].items()
-                            ]
-                            mainDesc2 = [
-                                val9
-                                for _, val9 in dataMain2["data"]["attributes"][
-                                    "description"
-                                ].items()
-                            ]
-                            for titles in dataMain2["data"]["attributes"]["altTitles"]:
-                                allAltTitles = [value for _, value in titles.items()]
+                            mangaTitle2 = (
+                                dataMain2["data"]["attributes"]["title"]["en"]
+                                if "en" in dataMain2["data"]["attributes"]["title"]
+                                else dataMain2["data"]["attributes"]["title"]
+                            )
+                            mainDesc2 = (
+                                dataMain2["data"]["attributes"]["description"]["en"]
+                                if "en"
+                                in dataMain2["data"]["attributes"]["description"]
+                                else dataMain2["data"]["attributes"]["description"]
+                            )
                             for k, v in dataMain2["data"]["attributes"].items():
                                 if k not in mangaFilter2:
-                                    embedVar.add_field(name=k, value=v, inline=True)
-                            for keys, value in dataMain2["data"]["attributes"][
-                                "links"
-                            ].items():
-                                embedVar.add_field(name=keys, value=value, inline=True)
+                                    embedVar.add_field(
+                                        name=k, value=f"[{v}]", inline=True
+                                    )
                             for tagItem in dataMain2["data"]["attributes"]["tags"]:
                                 mainTags = [
                                     v["name"]["en"]
@@ -230,12 +248,25 @@ class MangaDexV1(commands.Cog):
                             )
                             embedVar.add_field(
                                 name="Alt Titles",
-                                value=str(allAltTitles).replace("'", ""),
+                                value=str(
+                                    [
+                                        v
+                                        for items in dataMain2["data"]["attributes"][
+                                            "altTitles"
+                                        ]
+                                        for k, v in items.items()
+                                    ]
+                                ).replace("'", ""),
                                 inline=True,
                             )
                             embedVar.add_field(
                                 name="Tags",
                                 value=str(mainTags).replace("'", ""),
+                                inline=True,
+                            )
+                            embedVar.add_field(
+                                name="MangaDex URL",
+                                value=f'https://mangadex.org/title/{dataMain2["data"]["id"]}',
                                 inline=True,
                             )
                             await ctx.respond(embed=embedVar)
@@ -251,14 +282,14 @@ class MangaDexV1(commands.Cog):
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-    @mdScanlation.command(name="search")
+    @mdSearch.command(name="scanlation")
     async def scanlation_search(
         self, ctx, *, name: Option(str, "The name of the scanlation group")
     ):
-        """Returns up to 5 scanlation groups via the name given"""
+        """Returns up to 25 scanlation groups via the name given"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             params = {
-                "limit": 5,
+                "limit": 25,
                 "name": name,
                 "order[name]": "asc",
                 "order[relevance]": "desc",
@@ -267,262 +298,220 @@ class MangaDexV1(commands.Cog):
                 "https://api.mangadex.org/group", params=params
             ) as totally_another_response:
                 md_data2 = await totally_another_response.content.read()
-                mdDataMain = parser.parse(md_data2, recursive=True)
-                embed2 = discord.Embed()
-                mdFilter = ["altNames", "description", "name"]
+                mdDataMain = jsonParser.parse(md_data2, recursive=True)
                 try:
                     if len(mdDataMain["data"]) == 0:
-                        embed1 = discord.Embed()
-                        embed1.description = (
-                            "Sorry, but no results were found... Please try again."
-                        )
-                        embed1.add_field(
-                            name="Total", value=mdDataMain["total"], inline=True
-                        )
-                        embed1.add_field(
-                            name="HTTP Status",
-                            value=totally_another_response.status,
-                            inline=True,
-                        )
-                        await ctx.respond(embed=embed1)
-
+                        raise NoItemsError
                     else:
-                        for dictItem in mdDataMain["data"]:
-                            embed2.title = dictItem["attributes"]["name"]
-                            embed2.description = dictItem["attributes"]["description"]
-                            for k, v in dictItem["attributes"].items():
-                                if k not in mdFilter:
-                                    embed2.add_field(name=k, value=v, inline=True)
-                            await ctx.respond(embed=embed2)
-                except Exception as e:
-                    embedVar = discord.Embed()
-                    embedVar.description = (
-                        "The query could not be performed. Please try again."
-                    )
-                    embedVar.add_field(name="Reason", value=e, inline=True)
-                    await ctx.respond(embed=embedVar)
-
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
-    @mdScanlation.command(name="id")
-    async def scanlation_id(
-        self, ctx, *, scanlation_id: Option(str, "The ID of the scanlation group")
-    ):
-        """Returns the scanlation group with the ID given"""
-        async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            async with session.get(
-                f"https://api.mangadex.org/group/{scanlation_id}"
-            ) as another_response:
-                payload = await another_response.content.read()
-                payloadMain = parser.parse(payload, recursive=True)
-                print(payloadMain)
-                try:
-                    try:
-                        if payloadMain["result"] == "error":
-                            embed3 = discord.Embed()
-                            embed3.description = (
-                                "Sorry, but no results were found... Please try again."
-                            )
-                            await ctx.respond(embed=embed3)
-                        elif len(payloadMain["data"]) == 0:
-                            raise ValueError
-                        else:
-                            embed4 = discord.Embed()
-                            mdFilter2 = ["altNames", "description", "name"]
-                            embed4.title = payloadMain["data"]["attributes"]["name"]
-                            embed4.description = payloadMain["data"]["attributes"][
-                                "description"
-                            ]
-                            for k, v in payloadMain["data"]["attributes"].items():
-                                if k not in mdFilter2:
-                                    embed4.add_field(name=k, value=v, inline=True)
-                            await ctx.respond(embed=embed4)
-                    except ValueError:
-                        embedValError = discord.Embed()
-                        embedValError.description = (
-                            "Hm, it seems like there are no results... Please try again"
+                        mainPages = pages.Paginator(
+                            pages=[
+                                discord.Embed(
+                                    title=mainItem["attributes"]["name"],
+                                    description=mainItem["attributes"]["description"],
+                                )
+                                .add_field(
+                                    name="Alt Names",
+                                    value=mainItem["attributes"]["altNames"],
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Website",
+                                    value=mainItem["attributes"]["website"],
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Discord",
+                                    value=f'https://discord.gg/{mainItem["attributes"]["discord"]}'
+                                    if mainItem["attributes"]["discord"] is not None
+                                    else "None",
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Twitter",
+                                    value=f'https://twitter.com/{mainItem["attributes"]["twitter"]}'
+                                    if mainItem["attributes"]["twitter"] is not None
+                                    else "None",
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Contact Email",
+                                    value=mainItem["attributes"]["contactEmail"],
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Created At",
+                                    value=parser.isoparse(
+                                        mainItem["attributes"]["createdAt"]
+                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Updated At",
+                                    value=parser.isoparse(
+                                        mainItem["attributes"]["updatedAt"]
+                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    inline=True,
+                                )
+                                for mainItem in mdDataMain["data"]
+                            ],
+                            loop_pages=True,
                         )
-                        await ctx.respond(embed=embedValError)
-                except Exception as e:
-                    embedVar = discord.Embed()
-                    embedVar.description = (
-                        "The query could not be performed. Please try again."
+                        await mainPages.respond(ctx.interaction, ephemeral=False)
+                except NoItemsError:
+                    embed1 = discord.Embed()
+                    embed1.description = (
+                        "Sorry, but no results were found... Please try again."
                     )
-                    embedVar.add_field(name="Reason", value=e, inline=True)
-                    await ctx.respond(embed=embedVar)
+                    await ctx.respond(embed=embed1)
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-    @md.command(name="user")
-    async def user(self, ctx, *, user_id: Option(str, "The ID of the user")):
-        """Searches up users on mangadex via id"""
-        async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            async with session.get(f"https://api.mangadex.org/user/{user_id}") as rep:
-                payload = await rep.content.read()
-                payloadMain2 = orjson.loads(payload)
-                try:
-                    try:
-                        if payloadMain2["result"] == "error":
-                            embedError = discord.Embed()
-                            embedError.description = (
-                                "Sorry, but no results were found... Please try again."
-                            )
-                            await ctx.respond(embed=embedError)
-                        elif len(payloadMain2["data"]) == 0:
-                            raise ValueError
-                        else:
-                            embed = discord.Embed()
-                            mainFilter = ["attributes", "relationships"]
-                            embed.title = payloadMain2["data"]["attributes"]["username"]
-                            for payloadKeys, payloadValues in payloadMain2[
-                                "data"
-                            ].items():
-                                if payloadKeys not in mainFilter:
-                                    embed.add_field(
-                                        name=payloadKeys,
-                                        value=payloadValues,
-                                        inline=True,
-                                    )
-                            for k, v in payloadMain2["data"]["attributes"].items():
-                                if k not in "username":
-                                    embed.add_field(name=k, value=v, inline=True)
-                            await ctx.respond(embed=embed)
-                    except ValueError:
-                        embedValError = discord.Embed()
-                        embedValError.description = (
-                            "Hm, it seems like there are no results... Please try again"
-                        )
-                        await ctx.respond(embed=embedValError)
-
-                except Exception as e:
-                    embedVar = discord.Embed()
-                    embedVar.description = (
-                        "The query could not be performed. Please try again."
-                    )
-                    embedVar.add_field(name="Reason", value=e, inline=True)
-                    await ctx.respond(embed=embedVar)
-
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
-    @md.command(name="author")
+    @mdSearch.command(name="author")
     async def author(self, ctx, *, author_name: Option(str, "The name of the author")):
-        """Returns up to 5 authors and their info"""
+        """Returns up to 25 authors and their info"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            params = {"limit": 5, "name": author_name, "order[name]": "asc"}
+            params = {"limit": 25, "name": author_name, "order[name]": "asc"}
             async with session.get(
                 "https://api.mangadex.org/author", params=params
             ) as author_response:
                 author_payload = await author_response.content.read()
-                authorPayloadMain = parser.parse(author_payload, recursive=True)
-                embedVar = discord.Embed()
+                authorPayloadMain = jsonParser.parse(author_payload, recursive=True)
                 try:
-                    try:
-                        if len(authorPayloadMain["data"]) == 0:
-                            raise ValueError
-                        else:
-                            authorFilter = ["imageUrl", "name", "biography"]
-                            mainFilterV3 = ["attributes", "relationships", "type"]
-                            for authorDictItem in authorPayloadMain["data"]:
-                                embedVar.title = authorDictItem["attributes"]["name"]
-                                embedVar.description = authorDictItem["attributes"][
-                                    "biography"
-                                ]
-                                for keys, value in authorDictItem.items():
-                                    if keys not in mainFilterV3:
-                                        embedVar.add_field(
-                                            name=keys, value=value, inline=True
-                                        )
-                                        embedVar.remove_field(17)
-                                for k, v in authorDictItem["attributes"].items():
-                                    if k not in authorFilter:
-                                        embedVar.add_field(name=k, value=v, inline=True)
-                                        embedVar.remove_field(17)
-
-                                await ctx.respond(embed=embedVar)
-                    except ValueError:
-                        embedValError = discord.Embed()
-                        embedValError.description = (
-                            "Hm, it seems like there are no results... Please try again"
+                    if len(authorPayloadMain["data"]) == 0:
+                        raise NoItemsError
+                    else:
+                        mainPages = pages.Paginator(
+                            pages=[
+                                discord.Embed(
+                                    title=mainItem["attributes"]["name"],
+                                    description=mainItem["attributes"]["biography"],
+                                )
+                                .add_field(
+                                    name="Created At",
+                                    value=parser.isoparse(
+                                        mainItem["attributes"]["createdAt"]
+                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Updated At",
+                                    value=parser.isoparse(
+                                        mainItem["attributes"]["updatedAt"]
+                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Twitter",
+                                    value=mainItem["attributes"]["twitter"]
+                                    if mainItem["attributes"]["twitter"] is not None
+                                    else "None",
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Pixiv",
+                                    value=mainItem["attributes"]["pixiv"]
+                                    if mainItem["attributes"]["pixiv"] is not None
+                                    else "None",
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="YouTube",
+                                    value=mainItem["attributes"]["youtube"]
+                                    if mainItem["attributes"]["youtube"] is not None
+                                    else "None",
+                                    inline=True,
+                                )
+                                .add_field(
+                                    name="Website",
+                                    value=mainItem["attributes"]["website"],
+                                    inline=True,
+                                )
+                                for mainItem in authorPayloadMain["data"]
+                            ],
+                            loop_pages=True,
                         )
-                        await ctx.respond(embed=embedValError)
-                except Exception as e:
-                    embedVar = discord.Embed()
-                    embedVar.description = (
-                        "The query could not be performed. Please try again."
+                        await mainPages.respond(ctx.interaction, ephemeral=False)
+                except NoItemsError:
+                    embedValError = discord.Embed()
+                    embedValError.description = (
+                        "Hm, it seems like there are no results... Please try again"
                     )
-                    embedVar.add_field(name="Reason", value=e, inline=True)
-                    await ctx.respond(embed=embedVar)
+                    await ctx.respond(embed=embedValError)
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-    @md.command(name="read")
-    async def manga_read(
-        self,
-        ctx,
-        *,
-        manga_id: Option(str, "The Manga's ID"),
-        chapter_number: Option(int, "The chapter number of the manga"),
-    ):
-        """Reads a chapter out of the manga provided on MangaDex"""
-        try:
-            async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-                params = {
-                    "contentRating[]": "safe",
-                    "includeFutureUpdates": 1,
-                    "order[createdAt]": "asc",
-                    "order[updatedAt]": "asc",
-                    "order[publishAt]": "asc",
-                    "order[readableAt]": "asc",
-                    "order[volume]": "asc",
-                    "order[chapter]": "asc",
-                }
-                async with session.get(
-                    f"https://api.mangadex.org/manga/{manga_id}/feed", params=params
-                ) as r:
-                    data = await r.content.read()
-                    dataMain = parser.parse(data, recursive=True)
-                    if "error" in dataMain["result"]:
-                        raise NotFoundHTTPException
-                    else:
-                        chapterIndexID = List(dataMain["data"])[chapter_number]["id"]
-                        chapterTitle = List(dataMain["data"])[chapter_number][
-                            "attributes"
-                        ]["title"]
-                        chapterPos = List(dataMain["data"])[chapter_number][
-                            "attributes"
-                        ]["chapter"]
-                        async with aiohttp.ClientSession(
-                            json_serialize=orjson.dumps
-                        ) as session:
-                            async with session.get(
-                                f"https://api.mangadex.org/at-home/server/{chapterIndexID}"
-                            ) as r:
-                                data2 = await r.content.read()
-                                dataMain2 = parser.parse(data2, recursive=True)
-                                if "error" in dataMain2["result"]:
-                                    raise NotFoundHTTPException
-                                else:
-                                    chapter_hash = dataMain2["chapter"]["hash"]
-                                    paginator = pages.Paginator(
-                                        pages=[
-                                            discord.Embed()
-                                            .set_footer(
-                                                text=f"{chapterTitle} - Chapter {chapterPos}"
-                                            )
-                                            .set_image(
-                                                url=f"https://uploads.mangadex.org/data/{chapter_hash}/{item}"
-                                            )
-                                            for item in dataMain2["chapter"]["data"]
-                                        ],
-                                        loop_pages=True,
-                                    )
-                                    await paginator.respond(
-                                        ctx.interaction, ephemeral=False
-                                    )
-        except NotFoundHTTPException:
-            embedError = discord.Embed()
-            embedError.description = "It seems like the manga's id is invalid or cannot be found. Please try again"
-            await ctx.respond(embed=embedError)
+    # This will be disabled on production releases, since
+    # this requires an ID input, and is not finished yet.
+    # discord labs would definitely complain about this command...
+
+    # @md.command(name="read")
+    # async def manga_read(
+    #     self,
+    #     ctx,
+    #     *,
+    #     manga_id: Option(str, "The Manga's ID"),
+    #     chapter_number: Option(int, "The chapter number of the manga"),
+    # ):
+    #     """Reads a chapter out of the manga provided on MangaDex"""
+    #     try:
+    #         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
+    #             params = {
+    #                 "contentRating[]": "safe",
+    #                 "includeFutureUpdates": 1,
+    #                 "order[createdAt]": "asc",
+    #                 "order[updatedAt]": "asc",
+    #                 "order[publishAt]": "asc",
+    #                 "order[readableAt]": "asc",
+    #                 "order[volume]": "asc",
+    #                 "order[chapter]": "asc",
+    #             }
+    #             async with session.get(
+    #                 f"https://api.mangadex.org/manga/{manga_id}/feed", params=params
+    #             ) as r:
+    #                 data = await r.content.read()
+    #                 dataMain = jsonParser.parse(data, recursive=True)
+    #                 if "error" in dataMain["result"]:
+    #                     raise NotFoundHTTPException
+    #                 else:
+    #                     chapterIndexID = List(dataMain["data"])[chapter_number]["id"]
+    #                     chapterTitle = List(dataMain["data"])[chapter_number][
+    #                         "attributes"
+    #                     ]["title"]
+    #                     chapterPos = List(dataMain["data"])[chapter_number][
+    #                         "attributes"
+    #                     ]["chapter"]
+    #                     async with aiohttp.ClientSession(
+    #                         json_serialize=orjson.dumps
+    #                     ) as session:
+    #                         async with session.get(
+    #                             f"https://api.mangadex.org/at-home/server/{chapterIndexID}"
+    #                         ) as r:
+    #                             data2 = await r.content.read()
+    #                             dataMain2 = jsonParser.parse(data2, recursive=True)
+    #                             if "error" in dataMain2["result"]:
+    #                                 raise NotFoundHTTPException
+    #                             else:
+    #                                 chapter_hash = dataMain2["chapter"]["hash"]
+    #                                 paginator = pages.Paginator(
+    #                                     pages=[
+    #                                         discord.Embed()
+    #                                         .set_footer(
+    #                                             text=f"{chapterTitle} - Chapter {chapterPos}"
+    #                                         )
+    #                                         .set_image(
+    #                                             url=f"https://uploads.mangadex.org/data/{chapter_hash}/{item}"
+    #                                         )
+    #                                         for item in dataMain2["chapter"]["data"]
+    #                                     ],
+    #                                     loop_pages=True,
+    #                                 )
+    #                                 await paginator.respond(
+    #                                     ctx.interaction, ephemeral=False
+    #                                 )
+    #     except NotFoundHTTPException:
+    #         embedError = discord.Embed()
+    #         embedError.description = "It seems like the manga's id is invalid or cannot be found. Please try again"
+    #         await ctx.respond(embed=embedError)
 
 
 def setup(bot):

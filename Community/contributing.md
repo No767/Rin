@@ -31,8 +31,8 @@ Getting the environment set up for the bot is a kinda complex process. Rin now u
     ```sh
     curl https://pyenv.run | bash
     pyenv update
-    pyenv install 3.10.5
-    pyenv global 3.10.5
+    pyenv install 3.10.6
+    pyenv global 3.10.6
     pyenv rehash
     ```
 
@@ -72,8 +72,8 @@ Getting the environment set up for the bot is a kinda complex process. Rin now u
     ```sh
     curl https://pyenv.run | bash
     pyenv update
-    pyenv install 3.10.5
-    pyenv global 3.10.5
+    pyenv install 3.10.6
+    pyenv global 3.10.6
     pyenv rehash
     ```
 
@@ -109,8 +109,8 @@ Getting the environment set up for the bot is a kinda complex process. Rin now u
     ```sh
     curl https://pyenv.run | bash
     pyenv update
-    pyenv install 3.10.5
-    pyenv global 3.10.5
+    pyenv install 3.10.6
+    pyenv global 3.10.6
     pyenv rehash
     ```
 
@@ -153,8 +153,8 @@ Getting the environment set up for the bot is a kinda complex process. Rin now u
     ```sh
     curl https://pyenv.run | bash
     pyenv update
-    pyenv install 3.10.5
-    pyenv global 3.10.5
+    pyenv install 3.10.6
+    pyenv global 3.10.6
     pyenv rehash
     ```
 
@@ -188,8 +188,8 @@ Getting the environment set up for the bot is a kinda complex process. Rin now u
     ```sh
     curl https://pyenv.run | bash
     pyenv update
-    pyenv install 3.10.5
-    pyenv global 3.10.5
+    pyenv install 3.10.6
+    pyenv global 3.10.6
     pyenv rehash
     ```
 
@@ -231,8 +231,8 @@ Getting the environment set up for the bot is a kinda complex process. Rin now u
 
     ```sh
     pyenv update
-    pyenv install 3.10.5
-    pyenv global 3.10.5
+    pyenv install 3.10.6
+    pyenv global 3.10.6
     pyenv rehash
     ```
 
@@ -348,23 +348,32 @@ Make sure to always keep this in mind: Always add exception handling for Rin. An
 
 Some of the API's that Rin uses requires an API key. Here's the list of all of the services that require one:
 
-- Twitter (requires bearer token)
+- Twitter (requires bearer token, make sure that the bearer token supports Twitter API V2)
 - Reddit 
 - Hypixel
 - DeviantArt (Use the DA-Token-Refresher script in production for refreshing tokens)
-- Tenor
+- Tenor (Use API V2)
 - First FRC
 - Discord.bots.gg
 - Top.gg
 - GitHub
 - YouTube
 - Blue Alliance
-- Spotify (Requires refresher script as well)
 - Twitch
 
 ## Naming Conventions
 
 For Rin, the main naming convention is camelCasing. Python's naming convention is snake_casing, but I personally find it easier to use camelCasing. All classes for any cogs should be in PascalCase. And yes camelCase all variables. You'll get used to it...
+
+## Docker Tagging Styles
+
+Rin does have in fact a style of tagging docker images. Here it is:
+
+- If deploying to master or production (NOTE: DO NOT DEPLOY TO PRODUCTION UNLESS IT IS FULLY TESTED AND APPROVED):
+    `<image>:<github_release_tag>`
+    
+- If deploying to dev:
+    `<image>:<next_minor_version>-dev-<short_commit_sha>`
 
 ## Pull Requests and Commits
 
@@ -372,9 +381,8 @@ You have 2 option: Fork the repo and make a pull request back into the main one,
 
 ## Formatting
 
-This projects uses a ton of linters and formatters. The main formatters are Black, AutoPEP8, AutoFlake and Isort. And there are a lot of linters as well. Most of them are from Codefactor, Codacy, and Deepsource. You don't have to worry about them because they are set up as formatters on the CI/CD workflow. Meaning that once it is done, all the code is formatted already.
+Rin uses pre-commit hooks to format all of the code. Make sure run `git add --all` before committing to add all of the files. And if you get stuck in a loop, (mainly if black or isort constantly keep on formatting for no reason), append the `--no-verify` flag to the command to commit it directly.
 
-This allows for synchronization between both projects without constantly creating merge conflicts. Make sure that this is for the main code changes, not for other files like `README.md` or `LICENSE`.
 ## Issue and Feature Requests Reports
 
 If there is an issue or a feature you want to be added, use the built-in GitHub issue tracker. Though a system like Jira could be used, it would be more efficient to just use the issue tracker that GitHub provides. 
@@ -383,17 +391,17 @@ If there is an issue or a feature you want to be added, use the built-in GitHub 
 - If submitting a feature request, follow the template as well. As with issue reports, duplicate requests will not receive support
 
 # Releasing Tags
-In order to automate the release system, you have to make sure that in order to use it, the git commit message must be done correctly. Only use this if there is a new update that is ready to be released. These are pretty similar to [Angular's Commit Message Conventions](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines). Here's a table that should help with explaining this:
+In order to automate the release system, you have to make sure that in order to use it, the git commit message must be done correctly. Only use this if there is a new update that is ready to be released. Rin uses [SemVer](https://semver.org/) as the standard for versioning. Here's a table that should help with explaining this:
 
 | Type of Release, Update, or Patch | Example |
 |              :--:                 | :--:    | 
-| Major Release                     | `Release: v2.5` | 
-| Minor Release                     | `Update: v2.5.1`|
-| Patch Release                     | `Fix: Instagram API Cog removal` |
+| Major Release                     | `Release: v2` | 
+| Minor Release                     | `Update: v2.5.0`|
+| Patch Release                     | `Fix: v2.5.1` |
 
 
 ## Git Commit StyleGuides
 
 - If updating any other files that aren't project files or not important (stuff like README.md, contributing.md, etc), add the [skip ci] label in the front
 - With each new commit, the message should be more or less describing the changes. Please don't write useless commit messages...
-- If releasing tags, have it in this style. `Release: [insert what changed here]`, `Update: [insert what changed here]`, and `Fix: [insert what changed here]`. Release is a major release. This means it bumps from 1.0 to 2.0. Minor means it bumps up the version from 1.4 to 1.4.1 for example. And fix just applies a patch, which would be 1.4.1 to 1.4.1.1.
+- If releasing tags, have it in this style. `Release: [insert what changed here]`, `Update: [insert what changed here]`, and `Fix: [insert what changed here]`. Release is a major release. This means it bumps from 1.0.0 to 2.0.0. Minor means it bumps up the version from 1.4 to 1.5 for example. And fix just applies a patch, which would be 1.4.1 to 1.4.2.

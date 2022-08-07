@@ -1,0 +1,94 @@
+name: Docker Build (GHCR)
+
+on:
+  push:
+    paths-ignore:
+      - "**.md"
+    branches:
+      - master
+      - dev
+
+env:
+  IMAGE: ghcr.io/no767/rin
+  VERSION: latest
+  DEV_TAGGED_VERSION: v2.2.0-dev
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Defer workflow for 60 seconds
+        run: sleep 60s
+        shell: bash
+
+      - name: Prepare
+        id: prep
+        run: |
+          # Docker Tagging Syntax:
+          # If deploying to master or production (NOTE: DO NOT DEPLOY TO PRODUCTION UNLESS IT IS FULLY TESTED AND APPROVED):
+          # <image>:<tagged_version>
+          # 
+          # If deploying to dev:
+          # <image>:<next_minor_version>-dev-<short_commit_sha>
+
+          DOCKER_IMAGE=${{ env.IMAGE }}
+          VERSION=${{ env.VERSION }}
+          COMMIT_SHORTREF=${GITHUB_SHA::8}
+          BRANCH=${GITHUB_REF#refs/heads/}
+          
+          # If Git tags are used, tag the docker's tag with the git tag
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          fi
+
+          # Tag the Latest Build to allow for easier pulling
+          # This will be the latest dev build on GHCR, and latest production build on Docker Hub
+          TAGS="${DOCKER_IMAGE}:${VERSION}"
+
+          # If the BRANCH is dev, tag the image as 'dev-shortref'.
+          # The shortref is to be able to determine which commit the build came from
+          if [[ $BRANCH == dev ]]; then
+            TAGS="$TAGS,${DOCKER_IMAGE}:${{ env.DEV_TAGGED_VERSION }}-${COMMIT_SHORTREF}"
+          fi
+
+          # Set output parameters
+          echo ::set-output name=tags::${TAGS}
+          echo ::set-output name=docker_image::${DOCKER_IMAGE}
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          version: latest
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Alpine-Docker/Dockerfile
+          push: true
+          tags: ${{ steps.prep.outputs.tags }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      - name: Move Cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
