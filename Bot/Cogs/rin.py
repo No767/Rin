@@ -12,6 +12,8 @@ RIN_VERSION = "2.2.8"
 
 
 class Rin(commands.Cog):
+    """Basic commands for Rin"""
+
     def __init__(self, bot):
         self.bot = bot
 

@@ -21,7 +21,9 @@ TWITCH_CLIENT_ID = os.getenv("Twitch_API_Client_ID")
 jsonParser = simdjson.Parser()
 
 
-class TwitchV1(commands.Cog):
+class Twitch(commands.Cog):
+    """Commands for getting data from Twitch"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -201,4 +203,4 @@ class TwitchV1(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(TwitchV1(bot))
+    bot.add_cog(Twitch(bot))

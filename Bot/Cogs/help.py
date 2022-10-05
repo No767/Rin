@@ -39,11 +39,13 @@ class HelpSelect(discord.ui.Select):
 
 
 class Help(commands.Cog):
+    """Commands for getting the commands for Rin"""
+
     def __init__(self, bot):
         self.bot = bot
 
     @slash_command(name="help", description="The help command page for Rin")
-    async def akariHelp(self, ctx):
+    async def rinHelp(self, ctx):
         embed = discord.Embed(title=self.bot.user.name)
         embed.description = """
         Rin is a Discord bot focused on providing data from third party services such as Hypixel, Reddit, MyAnimeList/Jikan, and many others with lighting speed. Rin allows you to find memes on Reddit with the Reddit service, or get info about your favorite anime with the AniList service.\n

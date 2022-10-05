@@ -13,7 +13,9 @@ from rin_exceptions import HTTPException, NoItemsError, NotFoundHTTPException
 jsonParser = simdjson.Parser()
 
 
-class MALV1(commands.Cog):
+class MAL(commands.Cog):
+    """Commands for getting data from MyAnimeList"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -574,4 +576,4 @@ class MALV1(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(MALV1(bot))
+    bot.add_cog(MAL(bot))

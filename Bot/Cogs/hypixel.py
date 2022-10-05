@@ -17,7 +17,9 @@ hypixel_api_key = os.getenv("Hypixel_API_Key")
 parser = simdjson.Parser()
 
 
-class HypixelV1(commands.Cog):
+class Hypixel(commands.Cog):
+    """Commands for getting data from Hypixel"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -86,4 +88,4 @@ class HypixelV1(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(HypixelV1(bot))
+    bot.add_cog(Hypixel(bot))

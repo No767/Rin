@@ -17,7 +17,9 @@ Tenor_API_Key = os.getenv("Tenor_API_V2_Key")
 parser = simdjson.Parser()
 
 
-class TenorV1(commands.Cog):
+class Tenor(commands.Cog):
+    """Commands for getting GIFs from Tenor"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -248,4 +250,4 @@ class TenorV1(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(TenorV1(bot))
+    bot.add_cog(Tenor(bot))

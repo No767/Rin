@@ -13,7 +13,9 @@ from rin_exceptions import ItemNotFound, NoItemsError
 jsonParser = simdjson.Parser()
 
 
-class ModrinthV1(commands.Cog):
+class Modrinth(commands.Cog):
+    """Commands for getting data from Modrinth"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -530,4 +532,4 @@ class ModrinthV1(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(ModrinthV1(bot))
+    bot.add_cog(Modrinth(bot))

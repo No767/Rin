@@ -18,7 +18,9 @@ apiKey = os.getenv("Top_GG_API_Key")
 jsonParser = simdjson.Parser()
 
 
-class TopGGV1(commands.Cog):
+class TopGG(commands.Cog):
+    """Commands for getting data from Top.gg"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -84,4 +86,4 @@ class TopGGV1(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(TopGGV1(bot))
+    bot.add_cog(TopGG(bot))
