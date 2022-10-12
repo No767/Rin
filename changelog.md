@@ -9,6 +9,7 @@ This update removes some of the stuff that was causing issues in v2.2.7. And als
 - Fixed TBA Matches Team command being broken with future events (#265)
 - Move Dockerfiles into a separate Docker folder for cleanup
 - Rename all of the Cogs + Add Cog docstrings
+- Log the bot's username when starting up
 
 ## ✨ Additions
 
