@@ -18,7 +18,9 @@ apiKey = os.getenv("Blue_Alliance_API_Key")
 parser = simdjson.Parser()
 
 
-class BlueAllianceV1(commands.Cog):
+class BlueAlliance(commands.Cog):
+    """Commands for getting data from The Blue Alliance"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -154,7 +156,7 @@ class BlueAllianceV1(commands.Cog):
                 data = await r.content.read()
                 dataMain = parser.parse(data, recursive=True)
                 try:
-                    if "Error" in dataMain:
+                    if "Error" in dataMain or len(dataMain) == 0:
                         raise NoItemsError
                     else:
                         mainPages = pages.Paginator(
@@ -195,17 +197,12 @@ class BlueAllianceV1(commands.Cog):
                                     inline=True,
                                 )
                                 .add_field(
-                                    name="Predicted Time",
-                                    value=datetime.fromtimestamp(
-                                        mainItem["predicted_time"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
-                                    inline=True,
-                                )
-                                .add_field(
                                     name="Actual Time",
                                     value=datetime.fromtimestamp(
                                         mainItem["actual_time"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    ).strftime("%Y-%m-%d %H:%M:%S")
+                                    if mainItem["actual_time"] is not None
+                                    else "None",
                                     inline=True,
                                 )
                                 .add_field(
@@ -346,4 +343,4 @@ class BlueAllianceV1(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(BlueAllianceV1(bot))
+    bot.add_cog(BlueAlliance(bot))

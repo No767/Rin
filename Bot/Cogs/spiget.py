@@ -13,11 +13,13 @@ from rin_exceptions import NoItemsError
 parser = simdjson.Parser()
 
 
-class SpigetV1(commands.Cog):
+class Spigot(commands.Cog):
+    """Commands for getting data from SpigotMC"""
+
     def __init__(self, bot):
         self.bot = bot
 
-    spiget = SlashCommandGroup("spigot", "Commands for Spiget")
+    spiget = SlashCommandGroup("spigot", "Commands for Spigot")
 
     @spiget.command(name="search")
     async def spigetSearch(self, ctx, *, name: Option(str, "The name of the plugin")):
@@ -97,4 +99,4 @@ class SpigetV1(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(SpigetV1(bot))
+    bot.add_cog(Spigot(bot))

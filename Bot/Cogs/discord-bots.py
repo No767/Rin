@@ -18,6 +18,8 @@ jsonParser = simdjson.Parser()
 
 
 class DiscordBots(commands.Cog):
+    """Commands for getting data from discord.bots.gg"""
+
     def __init__(self, bot):
         self.bot = bot
 

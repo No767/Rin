@@ -11,7 +11,9 @@ from discord.ext import commands, pages
 parser = simdjson.Parser()
 
 
-class jishoDict(commands.Cog):
+class Jisho(commands.Cog):
+    """Commands for getting data from Jisho"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -123,4 +125,4 @@ class jishoDict(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(jishoDict(bot))
+    bot.add_cog(Jisho(bot))

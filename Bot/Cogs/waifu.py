@@ -14,7 +14,9 @@ from rin_exceptions import NotFoundHTTPException
 parser = simdjson.Parser()
 
 
-class WaifuCmdsV1(commands.Cog):
+class Waifu(commands.Cog):
+    """Commands for getting pictures of Waifus from multiple places"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -166,4 +168,4 @@ class WaifuCmdsV1(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(WaifuCmdsV1(bot))
+    bot.add_cog(Waifu(bot))

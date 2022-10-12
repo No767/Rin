@@ -18,7 +18,9 @@ api_key = os.getenv("FIRST_Events_Final_Key")
 jsonParser = simdjson.Parser()
 
 
-class FirstFRCV1(commands.Cog):
+class FirstFRC(commands.Cog):
+    """Commands for getting data from FIRST's FRC API"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -563,4 +565,4 @@ class FirstFRCV1(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(FirstFRCV1(bot))
+    bot.add_cog(FirstFRC(bot))
