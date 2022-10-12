@@ -6,7 +6,9 @@ This update removes some of the stuff that was causing issues in v2.2.7. And als
 - Bump version to `v2.2.8`
 - Completely rewrite the `help` command
 - Merged ungrouped commands into the `rin` cog (except for `help`)
-- 
+- Fixed TBA Matches Team command being broken with future events (#265)
+- Move Dockerfiles into a separate Docker folder for cleanup
+- Rename all of the Cogs + Add Cog docstrings
 
 ## ✨ Additions
 
@@ -24,4 +26,7 @@ This update removes some of the stuff that was causing issues in v2.2.7. And als
 
 ## ⬆️ Dependency Updates
 
-- \[pip](deps)\: Bump uvloop from 0.16.0 to 0.17.0 (@dependabot)
+- \[pip](deps)\: Bump aiohttp from 3.8.1 to 3.8.3 (@dependabot)
+- \[Actions](deps)\: Bump actions/setup-node from 3.4.1 to 3.5.0 (@dependabot)
+- \[pip](deps)\: Bump py-cord from 2.1.3 to 2.2.0 (@dependabot)
+- \[pip](deps)\: Bump py-cord from 2.2.0 to 2.2.2 (@dependabot)
