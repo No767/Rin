@@ -36,7 +36,7 @@ COPY /Bot/Cogs/ /Rin/Bot/Cogs
 COPY --from=builder /Rin/wheels /Rin/wheels
 COPY --from=builder /Rin/requirements.txt /Rin/requirements.txt
 
-COPY /Debian-Docker/start.sh /Rin/start.sh
+COPY /Docker/Debian-Docker/start.sh /Rin/start.sh
 
 RUN pip install --upgrade pip
 
