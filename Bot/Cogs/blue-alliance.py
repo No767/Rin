@@ -156,7 +156,7 @@ class BlueAlliance(commands.Cog):
                 data = await r.content.read()
                 dataMain = parser.parse(data, recursive=True)
                 try:
-                    if "Error" in dataMain:
+                    if "Error" in dataMain or len(dataMain) == 0:
                         raise NoItemsError
                     else:
                         mainPages = pages.Paginator(
@@ -197,17 +197,12 @@ class BlueAlliance(commands.Cog):
                                     inline=True,
                                 )
                                 .add_field(
-                                    name="Predicted Time",
-                                    value=datetime.fromtimestamp(
-                                        mainItem["predicted_time"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
-                                    inline=True,
-                                )
-                                .add_field(
                                     name="Actual Time",
                                     value=datetime.fromtimestamp(
                                         mainItem["actual_time"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    ).strftime("%Y-%m-%d %H:%M:%S")
+                                    if mainItem["actual_time"] is not None
+                                    else "None",
                                     inline=True,
                                 )
                                 .add_field(

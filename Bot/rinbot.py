@@ -30,7 +30,7 @@ for items in cogsList:
 # Adds in the bot presence
 @bot.event
 async def on_ready():
-    logging.info("Rin is ready to go!")
+    logging.info(f"{bot.user.name} is ready to go!")
     await bot.change_presence(
         activity=discord.Activity(type=discord.ActivityType.watching, name="/help")
     )
