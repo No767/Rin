@@ -18,6 +18,8 @@ gql = {extras = ["aiohttp"], version = "*"}
 python-dateutil = "*"
 rin-exceptions = "*"
 numpy = "*"
+tortoise-orm = {extras = ["accel"], version = "*"}
+asyncpg = "*"
 
 [dev-packages]
 pre-commit = "*"

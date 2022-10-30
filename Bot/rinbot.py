@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 # Grabs the bot's token from the .env file
 load_dotenv()
-TOKEN = os.getenv("TOKEN")
+TOKEN = os.getenv("Testing_Bot_Token")
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(intents=intents, help_command=None)
@@ -24,7 +24,7 @@ logging.getLogger("gql").setLevel(logging.WARNING)
 path = Path(__file__).parent.resolve()
 cogsList = os.listdir(os.path.join(path, "Cogs"))
 for items in cogsList:
-    if items.endswith(".py"):
+    if items.endswith(".py") and not items[:-3] == "models":
         bot.load_extension(f"Cogs.{items[:-3]}")
 
 # Adds in the bot presence
