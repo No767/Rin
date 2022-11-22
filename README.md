@@ -67,7 +67,7 @@ For Developers and Contributors:
 # Links 
 
 - [Documentation](https://rin-docs.vercel.app/)
-- [Website](https://starblaze.vercel.app/)
+- [Website](https://rin-dbot.vercel.app/)
 
 ## Bot Discovery Network Links
 
