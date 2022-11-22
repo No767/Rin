@@ -7,6 +7,7 @@ This update is just a cleanup update for the other ones.
 
 ## ✨ Additions
 
+- Added an interaction failure handler (to handle errors, ported from Kumiko)
 ## ➖ Removals
 
 
