@@ -11,18 +11,18 @@ orjson = "*"
 asyncpraw = "*"
 uvloop = "*"
 aiohttp = "*"
-cchardet = "*"
 py-cord = {version = "==2.2.2", extras = ["voice"]}
 pysimdjson = "*"
 gql = {extras = ["aiohttp"], version = "*"}
 python-dateutil = "*"
 rin-exceptions = "*"
 numpy = "*"
-tortoise-orm = {extras = ["accel"], version = "*"}
-asyncpg = "*"
+charset-normalizer = "*"
 
 [dev-packages]
 pre-commit = "*"
+asyncpg = "*"
+tortoise-orm = {extras = ["accel"], version = "*"}
 
 [requires]
 python_version = "3.10"
