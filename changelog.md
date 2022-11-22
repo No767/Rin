@@ -1,33 +1,20 @@
-# 🛠️ Rin V2.2.8 (LTS) 🛠️
+# 🛠️ Rin V2.2.9 (LTS) 🛠️
 
-This update removes some of the stuff that was causing issues in v2.2.7. And also adds some new improvements to the features.
+This update is just a cleanup update for the other ones. 
+
 ## 🛠️ Changes
 
-- Bump version to `v2.2.8`
-- Completely rewrite the `help` command
-- Merged ungrouped commands into the `rin` cog (except for `help`)
-- Fixed TBA Matches Team command being broken with future events (#265)
-- Move Dockerfiles into a separate Docker folder for cleanup
-- Rename all of the Cogs + Add Cog docstrings
-- Log the bot's username when starting up
 
 ## ✨ Additions
 
-- New `help` command system
-
 ## ➖ Removals
 
-- Removed `bot-info.py` cog (Merged into `rin` cog)
-- Removed `rinhelp.py` cog (Merged into `rin` cog)
-- Removed `rininfo.py` cog (Merged into `rin` cog)
-- Removed `rininvite.py` cog (Merged into `rin` cog)
-- Removed `rinping.py` cog (Merged into `rin` cog)
-- Removed `uptime.py` cog (Merged into `rin` cog)
-- Removed `version.py` cog (Merged into `rin` cog)
 
 ## ⬆️ Dependency Updates
 
-- \[pip](deps)\: Bump aiohttp from 3.8.1 to 3.8.3 (@dependabot)
-- \[Actions](deps)\: Bump actions/setup-node from 3.4.1 to 3.5.0 (@dependabot)
-- \[pip](deps)\: Bump py-cord from 2.1.3 to 2.2.0 (@dependabot)
-- \[pip](deps)\: Bump py-cord from 2.2.0 to 2.2.2 (@dependabot)
+- \[pip](deps)\: Bump numpy from 1.23.3 to 1.23.4 (@dependabot)
+- \[Actions](deps)\: Bump actions/setup-node from 3.5.0 to 3.5.1 (@dependabot)
+- \[pip](deps)\: Bump asyncpraw from 7.5.0 to 7.6.0 (@dependabot)
+- \[pip](deps)\: Bump orjson from 3.8.0 to 3.8.1 (@dependabot)
+- \[Actions](deps)\: Bump mathieudutour/github-tag-action from 6.0 to 6.1 (@dependabot)
+- \[pip](deps)\: Bump orjson from 3.8.1 to 3.8.2 (@dependabot)
