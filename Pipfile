@@ -11,7 +11,7 @@ orjson = "*"
 asyncpraw = "*"
 uvloop = "*"
 aiohttp = "*"
-py-cord = {version = "==2.3.0", extras = ["voice"]}
+py-cord = {version = "==2.3.1", extras = ["voice"]}
 pysimdjson = "*"
 gql = {extras = ["aiohttp"], version = "*"}
 python-dateutil = "*"
