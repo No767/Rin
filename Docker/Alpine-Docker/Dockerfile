@@ -21,7 +21,7 @@ COPY /poetry.lock /Rin/
 
 # Create dependency wheels
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes \
-  && pip wheel --wheel-dir=/Kumiko/wheels -r requirements.txt
+  && pip wheel --wheel-dir=/Rin/wheels -r requirements.txt
 
 ####################################################################################################
 ## Final image

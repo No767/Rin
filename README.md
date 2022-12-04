@@ -6,7 +6,7 @@
 
 <br/>
 
-![GitHub Pipenv locked Python version (branch)](https://img.shields.io/github/pipenv/locked/python-version/No767/Rin/dev?label=Python&logo=python&logoColor=white) 
+[![Required Python Version](https://img.shields.io/badge/Python-3.10%20|%203.11-blue?logo=python&logoColor=white)](https://github.com/No767/Rin/blob/dev/pyproject.toml)
 [![CodeQL](https://github.com/No767/Rin/actions/workflows/codeql-analysis.yml/badge.svg?branch=dev)](https://github.com/No767/Rin/actions/workflows/codeql-analysis.yml) [![Docker Build](https://github.com/No767/Rin/actions/workflows/docker-build.yml/badge.svg)](https://github.com/No767/Rin/actions/workflows/docker-build.yml) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/ec2cf4ceacc746b3a4570d324c843a4b)](https://www.codacy.com/gh/No767/Rin/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=No767/Rin&amp;utm_campaign=Badge_Grade) [![Open in GitPod](https://img.shields.io/badge/Open%20in%20-GitPod-blue?logo=gitpod)](https://gitpod.io/#https://github.com/No767/Rin) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/No767/Rin?label=Release&logo=github) ![GitHub](https://img.shields.io/github/license/No767/Rin?label=License&logo=github)
 
 A Discord bot focused on obtaining data from third-party services with lighting performance in mind
@@ -57,7 +57,7 @@ if you would like to get started, here are some links to help you with that:
 
 For end-users:
 - [Getting Started Guide](./Community/getting-started-guide.md)
-- [Documentation](https://docs.rinbot.live)
+- [Documentation](https://rin-docs.vercel.app/)
 
 For Developers and Contributors:
 - [Getting Started (For Developers)](https://github.com/No767/Rin/blob/dev/Community/getting-started-rin.md)
