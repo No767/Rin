@@ -1,26 +1,33 @@
 ####################################################################################################
 ## Builder image
 ####################################################################################################
-FROM python:3.10-slim-bullseye AS builder
+FROM python:3.11-slim-bullseye AS builder
 ENV DEBIAN_FRONTEND=noninteractive 
 RUN apt update \
     && apt install -y --no-install-recommends \
     build-essential \
-    ca-certificates
+    ca-certificates \
+    curl
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+RUN python -m pip install --upgrade pip setuptools
+RUN curl -sSL https://install.python-poetry.org | python -
+ENV PATH="${PATH}:/root/.local/bin"
 
 WORKDIR /Rin
 
-COPY /Pipfile* /Rin/
+COPY /pyproject.toml /Rin/
+COPY /poetry.lock /Rin/
 
 # Create dependency wheels
-RUN pip install --upgrade pip setuptools pipenv \
-    && pipenv requirements > requirements.txt \
-    && pip wheel --wheel-dir=/Rin/wheels -r requirements.txt
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes \
+  && pip wheel --wheel-dir=/Kumiko/wheels -r requirements.txt
 
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM python:3.10-slim-bullseye
+FROM python:3.11-slim-bullseye
 RUN apt update \
     && apt install -y --no-install-recommends \
     tini \
