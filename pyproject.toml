@@ -19,7 +19,7 @@ asyncpraw = "^7.6.1"
 gql = {extras = ["aiohttp"], version = "^3.4.0"}
 python-dateutil = "^2.8.2"
 rin-exceptions = "^1.0.3"
-numpy = "^1.23.5"
+numpy = "^1.24.0"
 
 
 [tool.poetry.group.dev.dependencies]
