@@ -15,9 +15,6 @@ RUN python -m pip install --upgrade pip setuptools
 RUN curl -sSL https://install.python-poetry.org | python -
 ENV PATH="${PATH}:/root/.local/bin"
 
-RUN curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal --default-toolchain stable -y
-ENV PATH="${PATH}:/root/.cargo/bin"
-
 WORKDIR /Rin
 
 COPY /pyproject.toml /Rin/
@@ -68,6 +65,6 @@ STOPSIGNAL SIGTERM
 # Image metadata
 LABEL org.opencontainers.image.title="Rin"
 LABEL org.opencontainers.image.description="Discord bot focused on obtaining data from third-party services with lighting performance in mind"
-LABEL org.opencontainers.image.url="https://rinbot.live"
+LABEL org.opencontainers.image.url="https://rin-dbot.vercel.app"
 LABEL org.opencontainers.image.licenses="Apache-2.0"
 LABEL org.opencontainers.image.source="https://github.com/No767/Rin"

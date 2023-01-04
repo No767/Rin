@@ -1,7 +1,7 @@
 ####################################################################################################
 ## Builder image
 ####################################################################################################
-FROM python:3.11-alpine3.16 AS builder
+FROM python:3.11-alpine AS builder
 
 RUN apk add --no-cache \
     ca-certificates \
@@ -29,7 +29,7 @@ RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM python:3.11-alpine3.16
+FROM python:3.11-alpine
 
 RUN apk add --no-cache \
     ca-certificates \
@@ -68,6 +68,6 @@ STOPSIGNAL SIGTERM
 # Image metadata
 LABEL org.opencontainers.image.title="Rin"
 LABEL org.opencontainers.image.description="Discord bot focused on obtaining data from third-party services with lighting performance in mind"
-LABEL org.opencontainers.image.url="https://rinbot.live"
+LABEL org.opencontainers.image.url="https://rin-dbot.vercel.app"
 LABEL org.opencontainers.image.licenses="Apache-2.0"
 LABEL org.opencontainers.image.source="https://github.com/No767/Rin"
