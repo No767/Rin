@@ -1,6 +1,8 @@
 import asyncio
+from typing import Dict, List
 
 import aiohttp
+import ciso8601
 import discord
 import orjson
 import simdjson
@@ -21,6 +23,34 @@ class List(list):
         return super().__getitem__(id - 1)
 
 
+def formatMangaTitles(titles: Dict) -> List:
+    return titles["en"] if "en" in titles else [v for _, v in titles.items()]
+
+
+def formatAltTitles(titles: List) -> List:
+    for items in titles:
+        if "en" in items:
+            return [items["en"]]
+        else:
+            return [v for _, v in items.items()]
+
+
+def formatMangaDescriptions(descriptions: Dict) -> List:
+    return (
+        descriptions["en"]
+        if "en" in descriptions
+        else [v for _, v in descriptions["description"].items()]
+    )
+
+
+def formatTags(tags: Dict) -> List:
+    return (
+        tags["en"]
+        if "en" in tags
+        else ", ".join([v for _, v in tags["name"].items()]).rstrip(", ")
+    )
+
+
 class MangaDex(commands.Cog):
     """Commands for getting data from MangaDex"""
 
@@ -28,10 +58,187 @@ class MangaDex(commands.Cog):
         self.bot = bot
 
     md = SlashCommandGroup("mangadex", "Commmands for the MangaDex service")
-    mdSearch = md.create_subgroup("search", "Search for stuff on MangaDex")
+    mdSearch = md.create_subgroup(
+        "search", "Search for stuff on MangaDex", guild_ids=[866199405090308116]
+    )
     mdScanlation = md.create_subgroup(
         "scanlation", "Commands for the scanlation section"
     )
+
+    @mdSearch.command(name="related-manga")
+    async def relatedManga(self, ctx, name: Option(str, "Name of manga")):
+        """Experimental version that includes related manga"""
+        async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
+            params = {
+                "title": name,
+                "publicationDemographic[]": "none",
+                "contentRating[]": "safe",
+                "order[title]": "asc",
+                "limit": 25,
+                "includes[]": ["cover_art", "manga", "tags", "author"],
+            }
+            async with session.get(
+                f"https://api.mangadex.org/manga/", params=params
+            ) as r:
+                data = await r.content.read()
+                dataMain = jsonParser.parse(data, recursive=True)
+                try:
+                    mainPageGroups = [
+                        pages.PageGroup(
+                            pages=[
+                                discord.Embed(
+                                    title=formatMangaTitles(
+                                        items["attributes"]["title"]
+                                    ),
+                                    description=formatMangaDescriptions(
+                                        items["attributes"]["description"]
+                                    ),
+                                )
+                                .add_field(
+                                    name="Alt Titles",
+                                    value=formatAltTitles(
+                                        items["attributes"]["altTitles"]
+                                    ),
+                                )
+                                .add_field(
+                                    name="Tags",
+                                    value=[
+                                        formatTags(tags["attributes"]["name"])
+                                        for tags in items["attributes"]["tags"]
+                                    ],
+                                )
+                                .add_field(
+                                    name="Status", value=items["attributes"]["status"]
+                                )
+                                .add_field(
+                                    name="Year", value=items["attributes"]["year"]
+                                )
+                                .add_field(
+                                    name="Created At",
+                                    value=discord.utils.format_dt(
+                                        ciso8601.parse_datetime(
+                                            items["attributes"]["createdAt"]
+                                        )
+                                    ),
+                                )
+                                .add_field(
+                                    name="Updated At",
+                                    value=discord.utils.format_dt(
+                                        ciso8601.parse_datetime(
+                                            items["attributes"]["updatedAt"]
+                                        )
+                                    ),
+                                )
+                                .set_image(
+                                    url=[
+                                        f'https://uploads.mangadex.org/covers/{items["id"]}/{subItems["attributes"]["fileName"]}'
+                                        for subItems in items["relationships"]
+                                        if subItems["type"] == "cover_art"
+                                    ][0]
+                                )
+                                for items in dataMain["data"]
+                            ],
+                            label="Manga",
+                            description="View the results of your search",
+                        ),
+                        pages.PageGroup(
+                            pages=[
+                                [
+                                    discord.Embed(
+                                        title=formatMangaTitles(
+                                            subItems["attributes"]["title"]
+                                        ),
+                                        description=formatMangaDescriptions(
+                                            subItems["attributes"]["description"]
+                                        ),
+                                    )
+                                    .add_field(
+                                        name="Alt Titles",
+                                        value=", ".join(
+                                            formatAltTitles(
+                                                subItems["attributes"]["altTitles"]
+                                            )
+                                        ),
+                                    )
+                                    .add_field(
+                                        name="Tags",
+                                        value=[
+                                            formatTags(tags["attributes"]["name"])
+                                            for tags in subItems["attributes"]["tags"]
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Status",
+                                        value=subItems["attributes"]["status"],
+                                    )
+                                    .add_field(
+                                        name="Year",
+                                        value=subItems["attributes"]["year"],
+                                    )
+                                    .add_field(
+                                        name="Created At",
+                                        value=discord.utils.format_dt(
+                                            ciso8601.parse_datetime(
+                                                subItems["attributes"]["createdAt"]
+                                            )
+                                        ),
+                                    )
+                                    .add_field(
+                                        name="Updated At",
+                                        value=discord.utils.format_dt(
+                                            ciso8601.parse_datetime(
+                                                subItems["attributes"]["updatedAt"]
+                                            )
+                                        ),
+                                    )
+                                    for subItems in items["relationships"]
+                                    if subItems["type"] == "manga"
+                                ][:3]
+                                for items in dataMain["data"]
+                            ],
+                            label="Related Manga",
+                            description="View related manga",
+                        ),
+                        pages.PageGroup(
+                            pages=[
+                                [
+                                    discord.Embed(
+                                        title=subItems["attributes"]["name"],
+                                        description=subItems["attributes"]["biography"],
+                                    )
+                                    .add_field(
+                                        name="Twitter",
+                                        value=subItems["attributes"]["twitter"]
+                                        if subItems["attributes"]["twitter"] is not None
+                                        else "None",
+                                    )
+                                    .add_field(
+                                        name="Pixiv",
+                                        value=subItems["attributes"]["pixiv"]
+                                        if subItems["attributes"]["pixiv"] is not None
+                                        else "None",
+                                    )
+                                    .add_field(
+                                        name="YouTube",
+                                        value=subItems["attributes"]["youtube"]
+                                        if subItems["attributes"]["youtube"] is not None
+                                        else "None",
+                                    )
+                                    for subItems in items["relationships"]
+                                    if subItems["type"] == "author"
+                                ]
+                                for items in dataMain["data"]
+                            ],
+                            label="Author",
+                            description="View the author of the manga(s)",
+                        ),
+                    ]
+                    mainPages = pages.Paginator(pages=mainPageGroups, show_menu=True)
+                    await mainPages.respond(ctx.interaction, ephemeral=False)
+                except NoItemsError:
+                    embedErrorAlt2 = discord.Embed()
+                    embedErrorAlt2.description = "Sorry, but the manga you searched for does not exist or is invalid. Please try again."
+                    await ctx.respond(embed=embedErrorAlt2)
 
     @mdSearch.command(name="manga")
     async def manga(self, ctx, *, manga: Option(str, "Name of Manga")):
