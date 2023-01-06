@@ -7,7 +7,6 @@ import discord
 import orjson
 import simdjson
 import uvloop
-from dateutil import parser
 from discord.commands import Option, SlashCommandGroup
 from discord.ext import commands, pages
 from rin_exceptions import NoItemsError
@@ -51,13 +50,78 @@ def formatTags(tags: Dict) -> List:
     )
 
 
+class ChapterSelection(discord.ui.Select):
+    def __init__(self, chapters: List):
+        super().__init__(
+            placeholder="Choose a chapter",
+            options=[
+                discord.SelectOption(
+                    select_type=discord.ComponentType.string_select,
+                    label=f"Chapter {items['chapter']} - {items['title']}",
+                )
+                for items in chapters
+            ],
+        )
+
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.send_message("FREEDOM!!!")
+
+
+class SelectMangaRead(discord.ui.View):
+    async def on_timeout(self):
+        for child in self.children:
+            child.disabled = True
+
+    def __init__(self, mangaData: Dict, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.mangaData = mangaData
+
+    @discord.ui.button(
+        label="Select",
+        row=1,
+        style=discord.ButtonStyle.primary,
+        emoji=discord.PartialEmoji.from_str("<:check:314349398811475968>"),
+    )
+    async def callback(self, button, interaction: discord.Interaction) -> None:
+        async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
+            params = {
+                "contentRating[]": ["safe"],
+                "translatedLanguage[]": ["en"],
+                "order[createdAt]": "asc",
+            }
+            mangaID = self.mangaData["id"]
+            async with session.get(
+                f"https://api.mangadex.org/manga/{mangaID}/feed", params=params
+            ) as r:
+                data = await r.content.read()
+                dataMain = jsonParser.parse(data, recursive=True)
+                newDict = sorted(
+                    [
+                        {
+                            "id": item["id"],
+                            "chapter": item["attributes"]["chapter"],
+                            "title": item["attributes"]["title"],
+                            "volume": item["attributes"]["volume"],
+                        }
+                        for item in dataMain["data"]
+                    ],
+                    key=lambda x: x["chapter"],
+                )
+                await interaction.response.edit_message(
+                    "Please select a given chapter",
+                    view=discord.ui.View(ChapterSelection(chapters=newDict)),
+                )
+
+
 class MangaDex(commands.Cog):
     """Commands for getting data from MangaDex"""
 
     def __init__(self, bot):
         self.bot = bot
 
-    md = SlashCommandGroup("mangadex", "Commmands for the MangaDex service")
+    md = SlashCommandGroup(
+        "mangadex", "Commmands for the MangaDex service", guild_ids=[866199405090308116]
+    )
     mdSearch = md.create_subgroup(
         "search", "Search for stuff on MangaDex", guild_ids=[866199405090308116]
     )
@@ -65,9 +129,9 @@ class MangaDex(commands.Cog):
         "scanlation", "Commands for the scanlation section"
     )
 
-    @mdSearch.command(name="related-manga")
+    @mdSearch.command(name="manga")
     async def relatedManga(self, ctx, name: Option(str, "Name of manga")):
-        """Experimental version that includes related manga"""
+        """Search for manga on MangaDex"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             params = {
                 "title": name,
@@ -172,8 +236,8 @@ class MangaDex(commands.Cog):
                                         value=subItems["attributes"]["status"],
                                     )
                                     .add_field(
-                                        name="Year",
-                                        value=subItems["attributes"]["year"],
+                                        name="MangaDex URL",
+                                        value=f"https://mangadex.org/title/{items['id']}",
                                     )
                                     .add_field(
                                         name="Created At",
@@ -239,140 +303,6 @@ class MangaDex(commands.Cog):
                     embedErrorAlt2 = discord.Embed()
                     embedErrorAlt2.description = "Sorry, but the manga you searched for does not exist or is invalid. Please try again."
                     await ctx.respond(embed=embedErrorAlt2)
-
-    @mdSearch.command(name="manga")
-    async def manga(self, ctx, *, manga: Option(str, "Name of Manga")):
-        """Searches for up to 25 manga on MangaDex"""
-        async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            params = {
-                "title": manga,
-                "publicationDemographic[]": "none",
-                "contentRating[]": "safe",
-                "order[title]": "asc",
-                "limit": 25,
-                "includes[]": "cover_art",
-            }
-            async with session.get(
-                f"https://api.mangadex.org/manga/", params=params
-            ) as r:
-                data = await r.content.read()
-                dataMain = jsonParser.parse(data, recursive=True)
-                try:
-                    if len(dataMain["data"]) == 0:
-                        raise NoItemsError
-                    else:
-                        mainPages = pages.Paginator(
-                            pages=[
-                                discord.Embed(
-                                    title=mainItem["attributes"]["title"]["en"]
-                                    if "en" in mainItem["attributes"]["title"]
-                                    else mainItem["attributes"]["title"],
-                                    description=mainItem["attributes"]["description"][
-                                        "en"
-                                    ]
-                                    if "en" in mainItem["attributes"]["description"]
-                                    else mainItem["attributes"]["description"],
-                                )
-                                .add_field(
-                                    name="Original Language",
-                                    value=f'[{mainItem["attributes"]["originalLanguage"]}]',
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Last Volume",
-                                    value=f'[{mainItem["attributes"]["lastVolume"]}]',
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Last Chapter",
-                                    value=f'[{mainItem["attributes"]["lastChapter"]}]',
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Status",
-                                    value=f'[{mainItem["attributes"]["status"]}]',
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Year",
-                                    value=f'[{mainItem["attributes"]["year"]}]',
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Content Rating",
-                                    value=f'[{mainItem["attributes"]["contentRating"]}]',
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Created At",
-                                    value=parser.isoparse(
-                                        mainItem["attributes"]["createdAt"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Last Updated At",
-                                    value=parser.isoparse(
-                                        mainItem["attributes"]["updatedAt"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Available Translated Language",
-                                    value=f'{mainItem["attributes"]["availableTranslatedLanguages"]}'.replace(
-                                        "'", ""
-                                    ),
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Tags",
-                                    value=str(
-                                        [
-                                            str(
-                                                [
-                                                    val
-                                                    for _, val in items["attributes"][
-                                                        "name"
-                                                    ].items()
-                                                ]
-                                            )
-                                            .replace("[", "")
-                                            .replace("]", "")
-                                            .replace("'", "")
-                                            for items in mainItem["attributes"]["tags"]
-                                        ]
-                                    ).replace("'", ""),
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="MangaDex URL",
-                                    value=f'https://mangadex.org/title/{mainItem["id"]}',
-                                    inline=True,
-                                )
-                                .set_image(
-                                    url=str(
-                                        [
-                                            f'https://uploads.mangadex.org/covers/{mainItem["id"]}/{items["attributes"]["fileName"]}'
-                                            for items in mainItem["relationships"]
-                                            if items["type"]
-                                            not in ["manga", "author", "artist"]
-                                        ]
-                                    )
-                                    .replace("'", "")
-                                    .replace("[", "")
-                                    .replace("]", "")
-                                )
-                                for mainItem in dataMain["data"]
-                            ],
-                            loop_pages=True,
-                        )
-                        await mainPages.respond(ctx.interaction, ephemeral=False)
-                except NoItemsError:
-                    embedErrorAlt2 = discord.Embed()
-                    embedErrorAlt2.description = "Sorry, but the manga you searched for does not exist or is invalid. Please try again."
-                    await ctx.respond(embed=embedErrorAlt2)
-
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
     @md.command(name="random")
     async def manga_random(self, ctx):
@@ -549,16 +479,20 @@ class MangaDex(commands.Cog):
                                 )
                                 .add_field(
                                     name="Created At",
-                                    value=parser.isoparse(
-                                        mainItem["attributes"]["createdAt"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    value=discord.utils.format_dt(
+                                        ciso8601.parse_datetime(
+                                            mainItem["attributes"]["createdAt"]
+                                        )
+                                    ),
                                     inline=True,
                                 )
                                 .add_field(
                                     name="Updated At",
-                                    value=parser.isoparse(
-                                        mainItem["attributes"]["updatedAt"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    value=discord.utils.format_dt(
+                                        ciso8601.parse_datetime(
+                                            mainItem["attributes"]["updatedAt"]
+                                        )
+                                    ),
                                     inline=True,
                                 )
                                 for mainItem in mdDataMain["data"]
@@ -597,16 +531,20 @@ class MangaDex(commands.Cog):
                                 )
                                 .add_field(
                                     name="Created At",
-                                    value=parser.isoparse(
-                                        mainItem["attributes"]["createdAt"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    value=discord.utils.format_dt(
+                                        ciso8601.parse_datetime(
+                                            mainItem["attributes"]["createdAt"]
+                                        )
+                                    ),
                                     inline=True,
                                 )
                                 .add_field(
                                     name="Updated At",
-                                    value=parser.isoparse(
-                                        mainItem["attributes"]["updatedAt"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    value=discord.utils.format_dt(
+                                        ciso8601.parse_datetime(
+                                            mainItem["attributes"]["updatedAt"]
+                                        )
+                                    ),
                                     inline=True,
                                 )
                                 .add_field(
@@ -653,15 +591,38 @@ class MangaDex(commands.Cog):
     # this requires an ID input, and is not finished yet.
     # discord labs would definitely complain about this command...
 
-    # @md.command(name="read")
-    # async def manga_read(
-    #     self,
-    #     ctx,
-    #     *,
-    #     manga_id: Option(str, "The Manga's ID"),
-    #     chapter_number: Option(int, "The chapter number of the manga"),
-    # ):
-    #     """Reads a chapter out of the manga provided on MangaDex"""
+    @md.command(name="read")
+    async def manga_read(
+        self,
+        ctx: discord.ApplicationContext,
+        name: Option(str, "The name of the manga"),
+    ):
+        """Reads a chapter out of the manga provided on MangaDex"""
+        async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
+            params = {
+                "title": name,
+                "publicationDemographic[]": "none",
+                "contentRating[]": "safe",
+                "order[title]": "asc",
+                "limit": 25,
+                "includes[]": ["cover_art"],
+            }
+            async with session.get(
+                f"https://api.mangadex.org/manga/", params=params
+            ) as r:
+                data = await r.content.read()
+                dataMain = jsonParser.parse(data, recursive=True)
+                mainPages = pages.Paginator(
+                    pages=[
+                        discord.Embed(
+                            title=formatMangaTitles(items["attributes"]["title"])
+                        )
+                        for items in dataMain
+                    ],
+                    custom_view=SelectMangaRead(mangaData=dataMain["data"]),
+                )  # the custom view will not work
+                await mainPages.respond(ctx.interaction)
+
     #     try:
     #         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
     #             params = {
