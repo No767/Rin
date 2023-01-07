@@ -56,15 +56,36 @@ class ChapterSelection(discord.ui.Select):
             placeholder="Choose a chapter",
             options=[
                 discord.SelectOption(
-                    select_type=discord.ComponentType.string_select,
                     label=f"Chapter {items['chapter']} - {items['title']}",
+                    value=items["chapter"],
                 )
                 for items in chapters
             ],
         )
+        self.chapters = chapters
 
     async def callback(self, interaction: discord.Interaction):
-        await interaction.response.send_message("FREEDOM!!!")
+        currIndex = int(self.values[0]) - 1
+        chapterID = self.chapters[currIndex]["id"]
+        async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
+            async with session.get(
+                f"https://api.mangadex.org/at-home/server/{chapterID}"
+            ) as r:
+                data = await r.content.read()
+                dataMain = jsonParser.parse(data, recursive=True)
+                chapterHash = dataMain["chapter"]["hash"]
+                chapterPages = [
+                    discord.Embed(
+                        title=f"Chapter {self.values[0]} - {self.chapters[currIndex]['title']}"
+                    )
+                    .set_image(
+                        url=f"https://uploads.mangadex.org/data/{chapterHash}/{items}"
+                    )
+                    .set_footer(text="Chapters provided by MangaDex")
+                    for items in dataMain["chapter"]["data"]
+                ]
+                mainPages = pages.Paginator(pages=chapterPages)
+                await mainPages.respond(interaction)
 
 
 class SelectMangaRead(discord.ui.View):
@@ -72,9 +93,10 @@ class SelectMangaRead(discord.ui.View):
         for child in self.children:
             child.disabled = True
 
-    def __init__(self, mangaData: Dict, *args, **kwargs):
+    def __init__(self, mangaData: Dict, currPageNum: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.mangaData = mangaData
+        self.currPageNum = currPageNum
 
     @discord.ui.button(
         label="Select",
@@ -87,28 +109,30 @@ class SelectMangaRead(discord.ui.View):
             params = {
                 "contentRating[]": ["safe"],
                 "translatedLanguage[]": ["en"],
-                "order[createdAt]": "asc",
+                "order[chapter]": "asc",
             }
-            mangaID = self.mangaData["id"]
+            mangaID = self.mangaData[self.currPageNum]["id"]
+            mangaName = formatMangaTitles(
+                self.mangaData[self.currPageNum]["attributes"]["title"]
+            )
             async with session.get(
                 f"https://api.mangadex.org/manga/{mangaID}/feed", params=params
             ) as r:
                 data = await r.content.read()
                 dataMain = jsonParser.parse(data, recursive=True)
-                newDict = sorted(
-                    [
-                        {
-                            "id": item["id"],
-                            "chapter": item["attributes"]["chapter"],
-                            "title": item["attributes"]["title"],
-                            "volume": item["attributes"]["volume"],
-                        }
-                        for item in dataMain["data"]
-                    ],
-                    key=lambda x: x["chapter"],
-                )
+                newDict = [
+                    {
+                        "id": item["id"],
+                        "chapter": item["attributes"]["chapter"],
+                        "title": item["attributes"]["title"],
+                        "volume": item["attributes"]["volume"],
+                    }
+                    for item in dataMain["data"]
+                ][:25]
                 await interaction.response.edit_message(
-                    "Please select a given chapter",
+                    embed=discord.Embed(
+                        description=f"Please select a chapter from **{mangaName}**"  # nosec B608
+                    ),
                     view=discord.ui.View(ChapterSelection(chapters=newDict)),
                 )
 
@@ -119,12 +143,8 @@ class MangaDex(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    md = SlashCommandGroup(
-        "mangadex", "Commmands for the MangaDex service", guild_ids=[866199405090308116]
-    )
-    mdSearch = md.create_subgroup(
-        "search", "Search for stuff on MangaDex", guild_ids=[866199405090308116]
-    )
+    md = SlashCommandGroup("mangadex", "Commmands for the MangaDex service")
+    mdSearch = md.create_subgroup("search", "Search for stuff on MangaDex")
     mdScanlation = md.create_subgroup(
         "scanlation", "Commands for the scanlation section"
     )
@@ -587,10 +607,6 @@ class MangaDex(commands.Cog):
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-    # This will be disabled on production releases, since
-    # this requires an ID input, and is not finished yet.
-    # discord labs would definitely complain about this command...
-
     @md.command(name="read")
     async def manga_read(
         self,
@@ -605,7 +621,7 @@ class MangaDex(commands.Cog):
                 "contentRating[]": "safe",
                 "order[title]": "asc",
                 "limit": 25,
-                "includes[]": ["cover_art"],
+                "includes[]": ["cover_art", "tags", "author"],
             }
             async with session.get(
                 f"https://api.mangadex.org/manga/", params=params
@@ -615,73 +631,61 @@ class MangaDex(commands.Cog):
                 mainPages = pages.Paginator(
                     pages=[
                         discord.Embed(
-                            title=formatMangaTitles(items["attributes"]["title"])
+                            title=formatMangaTitles(items["attributes"]["title"]),
+                            description=formatMangaDescriptions(
+                                items["attributes"]["description"]
+                            ),
                         )
-                        for items in dataMain
+                        .add_field(
+                            name="Alt Titles",
+                            value=formatAltTitles(items["attributes"]["altTitles"]),
+                        )
+                        .add_field(
+                            name="Author",
+                            value=[
+                                subItems["attributes"]["name"]
+                                for subItems in items["relationships"]
+                                if subItems["type"] == "author"
+                            ],
+                        )
+                        .add_field(
+                            name="Tags",
+                            value=[
+                                formatTags(tags["attributes"]["name"])
+                                for tags in items["attributes"]["tags"]
+                            ],
+                        )
+                        .add_field(name="Status", value=items["attributes"]["status"])
+                        .add_field(
+                            name="Created At",
+                            value=discord.utils.format_dt(
+                                ciso8601.parse_datetime(
+                                    items["attributes"]["createdAt"]
+                                )
+                            ),
+                        )
+                        .add_field(
+                            name="Updated At",
+                            value=discord.utils.format_dt(
+                                ciso8601.parse_datetime(
+                                    items["attributes"]["updatedAt"]
+                                )
+                            ),
+                        )
+                        .set_image(
+                            url=[
+                                f'https://uploads.mangadex.org/covers/{items["id"]}/{subItems["attributes"]["fileName"]}'
+                                for subItems in items["relationships"]
+                                if subItems["type"] == "cover_art"
+                            ][0]
+                        )
+                        for items in dataMain["data"]
                     ],
-                    custom_view=SelectMangaRead(mangaData=dataMain["data"]),
-                )  # the custom view will not work
+                    custom_view=SelectMangaRead(
+                        mangaData=dataMain["data"], currPageNum=0
+                    ),
+                )
                 await mainPages.respond(ctx.interaction)
-
-    #     try:
-    #         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-    #             params = {
-    #                 "contentRating[]": "safe",
-    #                 "includeFutureUpdates": 1,
-    #                 "order[createdAt]": "asc",
-    #                 "order[updatedAt]": "asc",
-    #                 "order[publishAt]": "asc",
-    #                 "order[readableAt]": "asc",
-    #                 "order[volume]": "asc",
-    #                 "order[chapter]": "asc",
-    #             }
-    #             async with session.get(
-    #                 f"https://api.mangadex.org/manga/{manga_id}/feed", params=params
-    #             ) as r:
-    #                 data = await r.content.read()
-    #                 dataMain = jsonParser.parse(data, recursive=True)
-    #                 if "error" in dataMain["result"]:
-    #                     raise NotFoundHTTPException
-    #                 else:
-    #                     chapterIndexID = List(dataMain["data"])[chapter_number]["id"]
-    #                     chapterTitle = List(dataMain["data"])[chapter_number][
-    #                         "attributes"
-    #                     ]["title"]
-    #                     chapterPos = List(dataMain["data"])[chapter_number][
-    #                         "attributes"
-    #                     ]["chapter"]
-    #                     async with aiohttp.ClientSession(
-    #                         json_serialize=orjson.dumps
-    #                     ) as session:
-    #                         async with session.get(
-    #                             f"https://api.mangadex.org/at-home/server/{chapterIndexID}"
-    #                         ) as r:
-    #                             data2 = await r.content.read()
-    #                             dataMain2 = jsonParser.parse(data2, recursive=True)
-    #                             if "error" in dataMain2["result"]:
-    #                                 raise NotFoundHTTPException
-    #                             else:
-    #                                 chapter_hash = dataMain2["chapter"]["hash"]
-    #                                 paginator = pages.Paginator(
-    #                                     pages=[
-    #                                         discord.Embed()
-    #                                         .set_footer(
-    #                                             text=f"{chapterTitle} - Chapter {chapterPos}"
-    #                                         )
-    #                                         .set_image(
-    #                                             url=f"https://uploads.mangadex.org/data/{chapter_hash}/{item}"
-    #                                         )
-    #                                         for item in dataMain2["chapter"]["data"]
-    #                                     ],
-    #                                     loop_pages=True,
-    #                                 )
-    #                                 await paginator.respond(
-    #                                     ctx.interaction, ephemeral=False
-    #                                 )
-    #     except NotFoundHTTPException:
-    #         embedError = discord.Embed()
-    #         embedError.description = "It seems like the manga's id is invalid or cannot be found. Please try again"
-    #         await ctx.respond(embed=embedError)
 
 
 def setup(bot):
