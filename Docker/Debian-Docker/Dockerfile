@@ -37,6 +37,7 @@ RUN apt update \
 WORKDIR /Rin
 
 COPY /Bot/rinbot.py /Rin/Bot/
+COPY /Bot/rincore.py /Rin/Bot/
 COPY /Bot/Cogs/ /Rin/Bot/Cogs
 
 # Copy dependency wheels from builder stage
