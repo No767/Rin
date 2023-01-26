@@ -1,5 +1,4 @@
 import logging
-import os
 from pathlib import Path
 
 import discord
@@ -13,17 +12,15 @@ class RinCore(discord.Bot):
         """Rin's Core - Now subclassed"""
         super().__init__(*args, **kwargs)
         self.logger = logging.getLogger("rinbot")
+        self.statusMessage.start()
         self.loadCogs()
 
     def loadCogs(self):
         """Rin's system to load cogs"""
-        path = Path(__file__).parent
-        cogsPath = path / "Cogs"
-        cogsList = os.listdir(cogsPath)
-        for items in cogsList:
-            if items.endswith(".py") and not items[:-3] == "models":
-                self.load_extension(f"Cogs.{items[:-3]}")
-                self.logger.debug(f"Loaded Cog: {items[:-3]}")
+        cogsPath = Path(__file__).parent.joinpath("Cogs")
+        for cog in cogsPath.rglob("*.py"):
+            self.load_extension(f"Cogs.{cog.name[:-3]}")
+            self.logger.debug(f"Loaded Cog: {cog.name[:-3]}")
 
     @tasks.loop(count=1)
     async def statusMessage(self):

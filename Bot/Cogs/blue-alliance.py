@@ -1,12 +1,11 @@
-import asyncio
 import os
 from datetime import datetime
 
 import aiohttp
+import ciso8601
 import discord
 import orjson
 import simdjson
-import uvloop
 from discord.commands import Option, SlashCommandGroup
 from discord.ext import commands, pages
 from dotenv import load_dotenv
@@ -14,7 +13,7 @@ from rin_exceptions import NoItemsError
 
 load_dotenv()
 
-apiKey = os.getenv("Blue_Alliance_API_Key")
+API_KEY = os.getenv("Blue_Alliance_API_Key")
 parser = simdjson.Parser()
 
 
@@ -38,34 +37,36 @@ class BlueAlliance(commands.Cog):
     ):
         """Returns info about an FRC team"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            headers = {"X-TBA-Auth-Key": apiKey}
+            headers = {"X-TBA-Auth-Key": API_KEY}
             async with session.get(
                 f"https://www.thebluealliance.com/api/v3/team/frc{team_number}",
                 headers=headers,
             ) as r:
-                data = await r.content.read()
-                dataMain = parser.parse(data, recursive=True)
-                embed = discord.Embed()
-
-                mainFilter = ["nickname", "team_number"]
                 try:
+                    data = await r.content.read()
+                    dataMain = parser.parse(data, recursive=True)
+                    embed = discord.Embed()
                     if "Error" in dataMain:
                         raise NoItemsError
                     else:
-                        for key, value in dataMain.items():
-                            if key not in mainFilter:
-                                embed.add_field(name=key, value=value, inline=True)
-                                embed.remove_field(-24)
                         embed.title = (
                             f"{dataMain['team_number']} - {dataMain['nickname']}"
                         )
+                        embed.add_field(name="City", value=dataMain["city"])
+                        embed.add_field(name="State", value=dataMain["state_prov"])
+                        embed.add_field(name="Country", value=dataMain["country"])
+                        embed.add_field(
+                            name="Rookie Year", value=dataMain["rookie_year"]
+                        )
+                        embed.add_field(
+                            name="Team Number", value=dataMain["team_number"]
+                        )
+                        embed.add_field(name="Team Website", value=dataMain["website"])
                         await ctx.respond(embed=embed)
                 except NoItemsError:
                     embedError = discord.Embed()
                     embedError.description = "It seems like there are no teams named like that. Please try again"
                     await ctx.respond(embed=embedError)
-
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
     @blueAllianceTeams.command(name="events")
     async def blueAllianceTeamEvents(
@@ -73,7 +74,7 @@ class BlueAlliance(commands.Cog):
     ):
         """Returns what events an FRC team has attended"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            headers = {"X-TBA-Auth-Key": apiKey}
+            headers = {"X-TBA-Auth-Key": API_KEY}
             async with session.get(
                 f"https://www.thebluealliance.com/api/v3/team/frc{team_number}/events",
                 headers=headers,
@@ -107,12 +108,16 @@ class BlueAlliance(commands.Cog):
                                 )
                                 .add_field(
                                     name="Start Date",
-                                    value=mainItem["start_date"],
+                                    value=discord.utils.format_dt(
+                                        ciso8601.parse_datetime(mainItem["start_date"])
+                                    ),
                                     inline=True,
                                 )
                                 .add_field(
                                     name="End Date",
-                                    value=mainItem["end_date"],
+                                    value=discord.utils.format_dt(
+                                        ciso8601.parse_datetime(mainItem["end_date"])
+                                    ),
                                     inline=True,
                                 )
                                 .add_field(
@@ -136,8 +141,6 @@ class BlueAlliance(commands.Cog):
                     embedError.description = "It seems like there are no teams named like that. Please try again"
                     await ctx.respond(embed=embedError)
 
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
     @blueAllianceMatches.command(name="team")
     async def blueAllianceTeamMatches(
         self,
@@ -146,81 +149,123 @@ class BlueAlliance(commands.Cog):
         team_number: Option(int, "The FRC team number"),
         event_key: Option(str, "The event key"),
     ):
-        """Returns the general info for each match that a team was in during the given event"""
-        async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            headers = {"X-TBA-Auth-Key": apiKey}
-            async with session.get(
-                f"https://www.thebluealliance.com/api/v3/team/frc{team_number}/event/{event_key}/matches",
-                headers=headers,
-            ) as r:
-                data = await r.content.read()
-                dataMain = parser.parse(data, recursive=True)
-                try:
+        """Testing for team matches"""
+        try:
+            async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
+                headers = {"X-TBA-Auth-Key": API_KEY}
+                async with session.get(
+                    f"https://www.thebluealliance.com/api/v3/team/frc{team_number}/event/{event_key}/matches",
+                    headers=headers,
+                ) as r:
+                    data = await r.content.read()
+                    dataMain = parser.parse(data, recursive=True)
                     if "Error" in dataMain or len(dataMain) == 0:
                         raise NoItemsError
                     else:
+                        pageGroupLists = [
+                            pages.PageGroup(
+                                pages=[
+                                    discord.Embed(
+                                        title=f"Match {items['match_number']}",
+                                        description=str(
+                                            items["alliances"]["blue"]["team_keys"]
+                                        ).replace("'", ""),
+                                        color=discord.Color.blue(),
+                                    )
+                                    .add_field(
+                                        name="Total Teleop Points",
+                                        value=items["score_breakdown"]["blue"][
+                                            "teleopPoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Total Endgame Points",
+                                        value=items["score_breakdown"]["blue"][
+                                            "endgamePoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Total Points",
+                                        value=items["score_breakdown"]["blue"][
+                                            "totalPoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Foul Count",
+                                        value=items["score_breakdown"]["blue"][
+                                            "foulCount"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Foul Points",
+                                        value=items["score_breakdown"]["blue"][
+                                            "foulPoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Ranking Points",
+                                        value=items["score_breakdown"]["blue"]["rp"],
+                                    )
+                                    for items in dataMain
+                                ],
+                                label="Blue Alliance",
+                            ),
+                            pages.PageGroup(
+                                pages=[
+                                    discord.Embed(
+                                        title=f"Match {items['match_number']}",
+                                        description=str(
+                                            items["alliances"]["red"]["team_keys"]
+                                        ).replace("'", ""),
+                                        color=discord.Color.red(),
+                                    )
+                                    .add_field(
+                                        name="Total Teleop Points",
+                                        value=items["score_breakdown"]["red"][
+                                            "teleopPoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Total Endgame Points",
+                                        value=items["score_breakdown"]["red"][
+                                            "endgamePoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Total Points",
+                                        value=items["score_breakdown"]["red"][
+                                            "totalPoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Foul Count",
+                                        value=items["score_breakdown"]["red"][
+                                            "foulCount"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Foul Points",
+                                        value=items["score_breakdown"]["red"][
+                                            "foulPoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Ranking Points",
+                                        value=items["score_breakdown"]["red"]["rp"],
+                                    )
+                                    for items in dataMain
+                                ],
+                                label="Red Alliance",
+                            ),
+                        ]
                         mainPages = pages.Paginator(
-                            pages=[
-                                discord.Embed(title=f'Match {mainItem["match_number"]}')
-                                .add_field(
-                                    name="Blue Alliance Teams",
-                                    value=mainItem["alliances"]["blue"]["team_keys"],
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Blue Alliance Total Points",
-                                    value=mainItem["score_breakdown"]["blue"][
-                                        "totalPoints"
-                                    ],
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Blue Alliance Total Score",
-                                    value=mainItem["alliances"]["blue"]["score"],
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Red Alliance Teams",
-                                    value=mainItem["alliances"]["red"]["team_keys"],
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Red Alliance Total Points",
-                                    value=mainItem["score_breakdown"]["red"][
-                                        "totalPoints"
-                                    ],
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Red Alliance Total Score",
-                                    value=mainItem["alliances"]["red"]["score"],
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Actual Time",
-                                    value=datetime.fromtimestamp(
-                                        mainItem["actual_time"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S")
-                                    if mainItem["actual_time"] is not None
-                                    else "None",
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Winning Alliance",
-                                    value=mainItem["winning_alliance"],
-                                    inline=True,
-                                )
-                                for mainItem in dataMain
-                            ],
-                            loop_pages=True,
+                            pages=pageGroupLists, show_menu=True
                         )
-                        await mainPages.respond(ctx.interaction, ephemeral=False)
-                except NoItemsError:
-                    embedError = discord.Embed()
-                    embedError.description = "It seems like there are no teams and/or event keys named like that. Please try again"
-                    await ctx.respond(embed=embedError)
-
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+                        await mainPages.respond(ctx.interaction)
+        except NoItemsError:
+            embedError = discord.Embed()
+            embedError.description = "It seems like there are no teams and/or event keys named like that. Please try again"
+            await ctx.respond(embed=embedError)
 
     @blueAlliance.command(name="rankings")
     async def blueAllianceEventRankings(
@@ -228,7 +273,7 @@ class BlueAlliance(commands.Cog):
     ):
         """Returns the event ranking"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            headers = {"X-TBA-Auth-Key": apiKey}
+            headers = {"X-TBA-Auth-Key": API_KEY}
             async with session.get(
                 f"https://www.thebluealliance.com/api/v3/event/{frc_event_key}/rankings",
                 headers=headers,
@@ -241,19 +286,9 @@ class BlueAlliance(commands.Cog):
                             discord.Embed(
                                 title=f'Rank {dictItem["rank"]} - {str(dictItem["team_key"]).replace("frc", "")}'
                             )
-                            .add_field(
-                                name="Matches Played",
-                                value=dictItem["matches_played"],
-                                inline=True,
-                            )
-                            .add_field(
-                                name="Records",
-                                value=[
-                                    f"{k}: {v}".replace("'", "")
-                                    for k, v in dictItem["record"].items()
-                                ],
-                                inline=True,
-                            )
+                            .add_field(name="Losses", value=dictItem["losses"])
+                            .add_field(name="Ties", value=dictItem["ties"])
+                            .add_field(name="Wins", value=dictItem["wins"])
                             for dictItem in dataMain["rankings"]
                         ],
                         loop_pages=True,
@@ -266,80 +301,175 @@ class BlueAlliance(commands.Cog):
                     )
                     await ctx.respond(embed=embedError)
 
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
     @blueAllianceMatches.command(name="all")
     async def blueAllianceEventMatches(
         self, ctx, *, frc_event_key: Option(str, "The event key")
     ):
         """Returns all of the matches for an FRC event"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            headers = {"X-TBA-Auth-Key": apiKey}
+            headers = {"X-TBA-Auth-Key": API_KEY}
             async with session.get(
-                f"https://www.thebluealliance.com/api/v3/event/{frc_event_key}/matches/simple",
+                f"https://www.thebluealliance.com/api/v3/event/{frc_event_key}/matches",
                 headers=headers,
-            ) as response:
-                data = await response.content.read()
+            ) as r:
+                data = await r.content.read()
                 dataMain = parser.parse(data, recursive=True)
                 try:
-                    if "Error" in dataMain:
+                    if "Error" in dataMain or len(dataMain) == 0:
                         raise NoItemsError
                     else:
-                        mainPages = pages.Paginator(
-                            pages=[
-                                [
+                        pageGroupLists = [
+                            pages.PageGroup(
+                                pages=[
                                     discord.Embed(
-                                        title=f"Match {dictItem['match_number']} - {dictItem['winning_alliance']}"
+                                        title=f"(Blue Alliance) Match {items['match_number']} - {items['comp_level']}",
+                                        description=str(
+                                            items["alliances"]["blue"]["team_keys"]
+                                        ).replace("'", ""),
+                                        color=discord.Color.blue(),
                                     )
                                     .add_field(
-                                        name="Comp Level",
-                                        value=dictItem["comp_level"],
-                                        inline=True,
+                                        name="Winning Alliance",
+                                        value=items["winning_alliance"],
                                     )
                                     .add_field(
-                                        name="Score (Red)",
-                                        value=dictItem["alliances"]["red"]["score"],
-                                        inline=True,
+                                        name="Time",
+                                        value=discord.utils.format_dt(
+                                            datetime.utcfromtimestamp(items["time"])
+                                        ),
                                     )
                                     .add_field(
-                                        name="Score (Blue)",
-                                        value=dictItem["alliances"]["blue"]["score"],
-                                        inline=True,
-                                    )
-                                    .add_field(
-                                        name="Blue Alliance",
-                                        value=[
-                                            str(blueTeam).replace("frc", "")
-                                            for blueTeam in dictItem["alliances"][
-                                                "blue"
-                                            ]["team_keys"]
+                                        name="Video",
+                                        value="None"
+                                        if len(items["videos"]) == 0
+                                        else [
+                                            str(
+                                                f"https://www.youtube.com/watch?v={item['key']}"
+                                            ).replace("'", "")
+                                            for item in items["videos"]
+                                            if item["type"] == "youtube"
                                         ],
-                                        inline=True,
                                     )
                                     .add_field(
-                                        name="Red Alliance",
-                                        value=[
-                                            str(redTeam).replace("frc", "")
-                                            for redTeam in dictItem["alliances"]["red"][
-                                                "team_keys"
-                                            ]
+                                        name="Total Teleop Points",
+                                        value=items["score_breakdown"]["blue"][
+                                            "teleopPoints"
                                         ],
-                                        inline=True,
                                     )
-                                ]
-                                for dictItem in dataMain
-                            ],
-                            loop_pages=True,
+                                    .add_field(
+                                        name="Total Endgame Points",
+                                        value=items["score_breakdown"]["blue"][
+                                            "endgamePoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Total Points",
+                                        value=items["score_breakdown"]["blue"][
+                                            "totalPoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Foul Count",
+                                        value=items["score_breakdown"]["blue"][
+                                            "foulCount"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Foul Points",
+                                        value=items["score_breakdown"]["blue"][
+                                            "foulPoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Ranking Points",
+                                        value=items["score_breakdown"]["blue"]["rp"],
+                                    )
+                                    for items in dataMain
+                                ],
+                                label="Blue Alliance",
+                            ),
+                            pages.PageGroup(
+                                pages=[
+                                    discord.Embed(
+                                        title=f"(Red Alliance) Match {items['match_number']} - {items['comp_level']}",
+                                        description=str(
+                                            items["alliances"]["red"]["team_keys"]
+                                        ).replace("'", ""),
+                                        color=discord.Color.red(),
+                                    )
+                                    .add_field(
+                                        name="Winning Alliance",
+                                        value=items["winning_alliance"],
+                                    )
+                                    .add_field(
+                                        name="Time",
+                                        value=discord.utils.format_dt(
+                                            datetime.utcfromtimestamp(items["time"])
+                                        ),
+                                    )
+                                    .add_field(
+                                        name="Video",
+                                        value="None"
+                                        if len(items["videos"]) == 0
+                                        else [
+                                            str(
+                                                f"https://www.youtube.com/watch?v={item['key']}"
+                                            ).replace("'", "")
+                                            for item in items["videos"]
+                                            if item["type"] == "youtube"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Total Teleop Points",
+                                        value=items["score_breakdown"]["red"][
+                                            "teleopPoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Total Endgame Points",
+                                        value=items["score_breakdown"]["red"][
+                                            "endgamePoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Total Points",
+                                        value=items["score_breakdown"]["red"][
+                                            "totalPoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Foul Count",
+                                        value=items["score_breakdown"]["red"][
+                                            "foulCount"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Foul Points",
+                                        value=items["score_breakdown"]["red"][
+                                            "foulPoints"
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Ranking Points",
+                                        value=items["score_breakdown"]["red"]["rp"],
+                                    )
+                                    for items in dataMain
+                                ],
+                                label="Red Alliance",
+                            ),
+                        ]
+                        mainPages = pages.Paginator(
+                            pages=pageGroupLists,
+                            show_menu=True,
+                            menu_placeholder="Choose Alliance",
                         )
-                        await mainPages.respond(ctx.interaction, ephemeral=False)
+                        await mainPages.respond(ctx.interaction)
                 except NoItemsError:
                     embedError = discord.Embed()
                     embedError.description = (
                         "It seems like there are no records available. Please try again"
                     )
                     await ctx.respond(embed=embedError)
-
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
 def setup(bot):
