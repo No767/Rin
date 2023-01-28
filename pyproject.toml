@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Rin"
-version = "2.2.9"
+version = "2.3.0"
 description = "A Discord bot focused on obtaining data from third-party services with lighting performance in mind"
 authors = ["No767 <73260931+No767@users.noreply.github.com>"]
 license = "Apache-2.0"
@@ -30,6 +30,10 @@ pre-commit = "^2.21.0"
 
 [tool.poetry.extras]
 db = ["tortoise-orm", "asyncpg"]
+
+[tool.isort]
+profile = 'black'
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

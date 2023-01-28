@@ -60,7 +60,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: ./Docker/Debian-Docker/Dockerfile
+          file: ./Docker/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -119,7 +119,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: ./Docker/Debian-Docker/Dockerfile
+          file: ./Docker/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=local,src=/tmp/.buildx-cache

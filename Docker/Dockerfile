@@ -21,7 +21,7 @@ COPY /pyproject.toml /Rin/
 COPY /poetry.lock /Rin/
 
 # Create dependency wheels
-RUN poetry export -f requirements.txt --output requirements.txt --without-hashes \
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes --without dev\
   && pip wheel --wheel-dir=/Rin/wheels -r requirements.txt
 
 ####################################################################################################
