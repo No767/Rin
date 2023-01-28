@@ -58,11 +58,14 @@ class ChapterSelection(discord.ui.Select):
                 discord.SelectOption(
                     label=f"Chapter {items['chapter']} - {items['title']}",
                     value=items["chapter"],
+                    description=items["scanlationGroups"],
                 )
                 for items in chapters
             ],
         )
         self.chapters = chapters
+        self.isFirst = True
+        self.currMessage = None
 
     async def callback(self, interaction: discord.Interaction):
         currIndex = int(self.values[0]) - 1
@@ -85,7 +88,12 @@ class ChapterSelection(discord.ui.Select):
                     for items in dataMain["chapter"]["data"]
                 ]
                 mainPages = pages.Paginator(pages=chapterPages)
-                await mainPages.respond(interaction)
+                if self.isFirst is True:
+                    self.isFirst = False
+                    self.currMessage = await mainPages.respond(interaction)
+                else:
+                    await self.currMessage.delete()
+                    self.currMessage = await mainPages.respond(interaction)
 
 
 class SelectMangaRead(discord.ui.View):
@@ -97,6 +105,9 @@ class SelectMangaRead(discord.ui.View):
         super().__init__(*args, **kwargs)
         self.mangaData = mangaData
         self.currPageNum = currPageNum
+
+    def setCurrPageNum(self, pageNum: int):
+        self.currPageNum = pageNum
 
     @discord.ui.button(
         label="Select",
@@ -110,6 +121,7 @@ class SelectMangaRead(discord.ui.View):
                 "contentRating[]": ["safe"],
                 "translatedLanguage[]": ["en"],
                 "order[chapter]": "asc",
+                "includes[]": ["scanlation_group"],
             }
             mangaID = self.mangaData[self.currPageNum]["id"]
             mangaName = formatMangaTitles(
@@ -126,6 +138,13 @@ class SelectMangaRead(discord.ui.View):
                         "chapter": item["attributes"]["chapter"],
                         "title": item["attributes"]["title"],
                         "volume": item["attributes"]["volume"],
+                        "scanlationGroups": str(
+                            [
+                                subItems["attributes"]["name"]
+                                for subItems in item["relationships"]
+                                if subItems["type"] == "scanlation_group"
+                            ]
+                        ).replace("'", "")[1:-1],
                     }
                     for item in dataMain["data"]
                 ][:25]
@@ -681,9 +700,10 @@ class MangaDex(commands.Cog):
                         )
                         for items in dataMain["data"]
                     ],
-                    custom_view=SelectMangaRead(
-                        mangaData=dataMain["data"], currPageNum=0
-                    ),
+                )
+                # The current_pages one is bugged. it's always set to zero apparently
+                mainPages.custom_view = SelectMangaRead(
+                    mangaData=dataMain["data"], currPageNum=mainPages.current_page
                 )
                 await mainPages.respond(ctx.interaction)
 
