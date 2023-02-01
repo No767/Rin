@@ -21,7 +21,7 @@ COPY /pyproject.toml /Rin/
 COPY /poetry.lock /Rin/
 
 # Create dependency wheels
-RUN poetry export -f requirements.txt --output requirements.txt --without-hashes --without dev\
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes --only main \
   && pip wheel --wheel-dir=/Rin/wheels -r requirements.txt
 
 ####################################################################################################
@@ -44,7 +44,7 @@ COPY /Bot/Cogs/ /Rin/Bot/Cogs
 COPY --from=builder /Rin/wheels /Rin/wheels
 COPY --from=builder /Rin/requirements.txt /Rin/requirements.txt
 
-COPY /Docker/Debian-Docker/start.sh /Rin/start.sh
+COPY /Docker/start.sh /Rin/start.sh
 
 RUN pip install --upgrade pip
 
