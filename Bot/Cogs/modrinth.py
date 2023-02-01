@@ -1,13 +1,14 @@
 import asyncio
 
 import aiohttp
+import ciso8601
 import discord
 import orjson
 import simdjson
 import uvloop
-from dateutil import parser
 from discord.commands import Option, SlashCommandGroup
 from discord.ext import commands, pages
+from discord.utils import format_dt
 from rin_exceptions import ItemNotFound, NoItemsError
 
 jsonParser = simdjson.Parser()
@@ -77,16 +78,20 @@ class Modrinth(commands.Cog):
                                 )
                                 .add_field(
                                     name="Date Created",
-                                    value=parser.isoparse(
-                                        mainItem["date_created"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    value=format_dt(
+                                        ciso8601.parse_datetime(
+                                            mainItem["date_created"]
+                                        )
+                                    ),
                                     inline=True,
                                 )
                                 .add_field(
                                     name="Last Updated",
-                                    value=parser.isoparse(
-                                        mainItem["date_modified"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    value=format_dt(
+                                        ciso8601.parse_datetime(
+                                            mainItem["date_modified"]
+                                        )
+                                    ),
                                     inline=True,
                                 )
                                 .add_field(
@@ -195,16 +200,18 @@ class Modrinth(commands.Cog):
                                     embedVar.description = f"{modDataMain['description']}\n\n{modDataMain['body']}"
                                     embedVar.add_field(
                                         name="Publish Time",
-                                        value=parser.isoparse(
+                                        value=ciso8601.parse_datetime(
                                             modDataMain["published"]
-                                        ).strftime("%Y-%m-%d %H:%M:%S"),
+                                        ),
                                         inline=True,
                                     )
                                     embedVar.add_field(
                                         name="Updated Time",
-                                        value=parser.isoparse(
-                                            modDataMain["updated"]
-                                        ).strftime("%Y-%m-%d %H:%M:%S"),
+                                        value=format_dt(
+                                            ciso8601.parse_datetime(
+                                                modDataMain["updated"]
+                                            )
+                                        ),
                                         inline=True,
                                     )
                                     embedVar.add_field(
@@ -295,9 +302,13 @@ class Modrinth(commands.Cog):
                                                     )
                                                     .add_field(
                                                         name="Date Published",
-                                                        value=parser.isoparse(
-                                                            mainItem["date_published"]
-                                                        ).strftime("%Y-%m-%d %H:%M:%S"),
+                                                        value=format_dt(
+                                                            ciso8601.parse_datetime(
+                                                                mainItem[
+                                                                    "date_published"
+                                                                ]
+                                                            )
+                                                        ),
                                                         inline=True,
                                                     )
                                                     .add_field(
@@ -432,8 +443,8 @@ class Modrinth(commands.Cog):
                     embedVar.description = userDataMain["bio"]
                     embedVar.add_field(
                         name="created",
-                        value=parser.isoparse(userDataMain["created"]).strftime(
-                            "%Y-%m-%d %H:%M:%S"
+                        value=format_dt(
+                            ciso8601.parse_datetime(userDataMain["created"])
                         ),
                         inline=True,
                     )
@@ -479,16 +490,20 @@ class Modrinth(commands.Cog):
                                             )
                                             .add_field(
                                                 name="Published Time",
-                                                value=parser.isoparse(
-                                                    mainItem["published"]
-                                                ).strftime("%Y-%m-%d %H:%M:%S"),
+                                                value=format_dt(
+                                                    ciso8601.parse_datetime(
+                                                        mainItem["published"]
+                                                    )
+                                                ),
                                                 inline=True,
                                             )
                                             .add_field(
                                                 name="Last Updated",
-                                                value=parser.isoparse(
-                                                    mainItem["updated"]
-                                                ).strftime("%Y-%m-%d %H:%M:%S"),
+                                                value=format_dt(
+                                                    ciso8601.parse_datetime(
+                                                        mainItem["updated"]
+                                                    )
+                                                ),
                                                 inline=True,
                                             )
                                             .add_field(

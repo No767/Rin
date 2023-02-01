@@ -9,6 +9,7 @@ import simdjson
 import uvloop
 from discord.commands import Option, SlashCommandGroup
 from discord.ext import commands, pages
+from discord.utils import format_dt
 from rin_exceptions import NoItemsError
 
 jsonParser = simdjson.Parser()
@@ -218,7 +219,7 @@ class MangaDex(commands.Cog):
                                 )
                                 .add_field(
                                     name="Created At",
-                                    value=discord.utils.format_dt(
+                                    value=format_dt(
                                         ciso8601.parse_datetime(
                                             items["attributes"]["createdAt"]
                                         )
@@ -226,7 +227,7 @@ class MangaDex(commands.Cog):
                                 )
                                 .add_field(
                                     name="Updated At",
-                                    value=discord.utils.format_dt(
+                                    value=format_dt(
                                         ciso8601.parse_datetime(
                                             items["attributes"]["updatedAt"]
                                         )
@@ -280,7 +281,7 @@ class MangaDex(commands.Cog):
                                     )
                                     .add_field(
                                         name="Created At",
-                                        value=discord.utils.format_dt(
+                                        value=format_dt(
                                             ciso8601.parse_datetime(
                                                 subItems["attributes"]["createdAt"]
                                             )
@@ -288,7 +289,7 @@ class MangaDex(commands.Cog):
                                     )
                                     .add_field(
                                         name="Updated At",
-                                        value=discord.utils.format_dt(
+                                        value=format_dt(
                                             ciso8601.parse_datetime(
                                                 subItems["attributes"]["updatedAt"]
                                             )
@@ -518,7 +519,7 @@ class MangaDex(commands.Cog):
                                 )
                                 .add_field(
                                     name="Created At",
-                                    value=discord.utils.format_dt(
+                                    value=format_dt(
                                         ciso8601.parse_datetime(
                                             mainItem["attributes"]["createdAt"]
                                         )
@@ -527,7 +528,7 @@ class MangaDex(commands.Cog):
                                 )
                                 .add_field(
                                     name="Updated At",
-                                    value=discord.utils.format_dt(
+                                    value=format_dt(
                                         ciso8601.parse_datetime(
                                             mainItem["attributes"]["updatedAt"]
                                         )
@@ -570,7 +571,7 @@ class MangaDex(commands.Cog):
                                 )
                                 .add_field(
                                     name="Created At",
-                                    value=discord.utils.format_dt(
+                                    value=format_dt(
                                         ciso8601.parse_datetime(
                                             mainItem["attributes"]["createdAt"]
                                         )
@@ -579,7 +580,7 @@ class MangaDex(commands.Cog):
                                 )
                                 .add_field(
                                     name="Updated At",
-                                    value=discord.utils.format_dt(
+                                    value=format_dt(
                                         ciso8601.parse_datetime(
                                             mainItem["attributes"]["updatedAt"]
                                         )
@@ -677,7 +678,7 @@ class MangaDex(commands.Cog):
                         .add_field(name="Status", value=items["attributes"]["status"])
                         .add_field(
                             name="Created At",
-                            value=discord.utils.format_dt(
+                            value=format_dt(
                                 ciso8601.parse_datetime(
                                     items["attributes"]["createdAt"]
                                 )
@@ -685,7 +686,7 @@ class MangaDex(commands.Cog):
                         )
                         .add_field(
                             name="Updated At",
-                            value=discord.utils.format_dt(
+                            value=format_dt(
                                 ciso8601.parse_datetime(
                                     items["attributes"]["updatedAt"]
                                 )

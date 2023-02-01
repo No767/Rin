@@ -2,13 +2,14 @@ import asyncio
 import os
 
 import aiohttp
+import ciso8601
 import discord
 import orjson
 import simdjson
 import uvloop
-from dateutil import parser
 from discord.commands import Option, SlashCommandGroup
 from discord.ext import commands, pages
+from discord.utils import format_dt
 from dotenv import load_dotenv
 from rin_exceptions import HTTPException, NoItemsError
 
@@ -16,7 +17,7 @@ jsonParser = simdjson.Parser()
 
 load_dotenv()
 
-githubAPIKey = os.getenv("GitHub_API_Access_Token")
+GITHUB_API_KEY = os.getenv("GitHub_API_Access_Token")
 
 
 class GitHub(commands.Cog):
@@ -36,7 +37,7 @@ class GitHub(commands.Cog):
         """Searches for repositories on GitHub"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             params = {"q": repo, "sort": "stars", "order": "desc", "per_page": 25}
@@ -73,9 +74,11 @@ class GitHub(commands.Cog):
                                     )
                                     .add_field(
                                         name="Creation Date",
-                                        value=parser.isoparse(
-                                            mainItem["created_at"]
-                                        ).strftime("%Y-%m-%d %H:%M:%S"),
+                                        value=format_dt(
+                                            ciso8601.parse_datetime(
+                                                mainItem["created_at"]
+                                            )
+                                        ),
                                         inline=True,
                                     )
                                     .add_field(
@@ -124,7 +127,7 @@ class GitHub(commands.Cog):
         """Searches for users on GitHub"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             params = {"q": user, "sort": "stars", "order": "desc", "per_page": 25}
@@ -187,7 +190,7 @@ class GitHub(commands.Cog):
         """Gets all issues from a repo"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             params = {
@@ -235,16 +238,20 @@ class GitHub(commands.Cog):
                                         )
                                         .add_field(
                                             name="Issue Created",
-                                            value=parser.isoparse(
-                                                mainItem3["created_at"]
-                                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                                            value=format_dt(
+                                                ciso8601.parse_datetime(
+                                                    mainItem3["created_at"]
+                                                )
+                                            ),
                                             inline=True,
                                         )
                                         .add_field(
                                             name="Issue Updated",
-                                            value=parser.isoparse(
-                                                mainItem3["updated_at"]
-                                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                                            value=format_dt(
+                                                ciso8601.parse_datetime(
+                                                    mainItem3["updated_at"]
+                                                )
+                                            ),
                                             inline=True,
                                         )
                                         .add_field(
@@ -311,7 +318,7 @@ class GitHub(commands.Cog):
         """Gets info about one issue on any repo on GitHub"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             async with session.get(
@@ -367,15 +374,15 @@ class GitHub(commands.Cog):
                         embed.description = dataMain["body"]
                         embed.add_field(
                             name="created at",
-                            value=parser.isoparse(dataMain["created_at"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
+                            value=format_dt(
+                                ciso8601.parse_datetime(dataMain["created_at"])
                             ),
                             inline=True,
                         )
                         embed.add_field(
                             name="updated at",
-                            value=parser.isoparse(dataMain["updated_at"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
+                            value=format_dt(
+                                ciso8601.parse_datetime(dataMain["updated_at"])
                             ),
                             inline=True,
                         )
@@ -398,7 +405,7 @@ class GitHub(commands.Cog):
         """Lists out up to 25 releases of any repo"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             params = {"per_page": 25}
@@ -430,16 +437,18 @@ class GitHub(commands.Cog):
                                     )
                                     .add_field(
                                         name="Created At",
-                                        value=parser.isoparse(
+                                        value=ciso8601.parse_datetime(
                                             dictItem5["created_at"]
-                                        ).strftime("%Y-%m-%d %H:%M:%S"),
+                                        ),
                                         inline=True,
                                     )
                                     .add_field(
                                         name="Published At",
-                                        value=parser.isoparse(
-                                            dictItem5["published_at"]
-                                        ).strftime("%Y-%m-%d %H:%M:%S"),
+                                        value=format_dt(
+                                            ciso8601.parse_datetime(
+                                                dictItem5["published_at"]
+                                            )
+                                        ),
                                         inline=True,
                                     )
                                     .add_field(
@@ -508,7 +517,7 @@ class GitHub(commands.Cog):
         """Gets the latest published full release for any repo"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             async with session.get(
@@ -551,15 +560,15 @@ class GitHub(commands.Cog):
                         embed.set_thumbnail(url=dataMain["author"]["avatar_url"])
                         embed.add_field(
                             name="created_at",
-                            value=parser.isoparse(dataMain["created_at"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
+                            value=format_dt(
+                                ciso8601.parse_datetime(dataMain["created_at"])
                             ),
                             inline=True,
                         )
                         embed.add_field(
                             name="published_at",
-                            value=parser.isoparse(dataMain["published_at"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
+                            value=format_dt(
+                                ciso8601.parse_datetime(dataMain["published_at"])
                             ),
                             inline=True,
                         )
@@ -582,7 +591,7 @@ class GitHub(commands.Cog):
         """Returns info about any repo"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             async with session.get(
@@ -690,22 +699,22 @@ class GitHub(commands.Cog):
                                 )
                         embedMain.add_field(
                             name="created_at",
-                            value=parser.isoparse(dataMain["created_at"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
+                            value=format_dt(
+                                ciso8601.parse_datetime(dataMain["created_at"])
                             ),
                             inline=True,
                         )
                         embedMain.add_field(
                             name="updated_at",
-                            value=parser.isoparse(dataMain["updated_at"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
+                            value=format_dt(
+                                ciso8601.parse_datetime(dataMain["updated_at"])
                             ),
                             inline=True,
                         )
                         embedMain.add_field(
                             name="pushed_at",
-                            value=parser.isoparse(dataMain["pushed_at"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
+                            value=format_dt(
+                                ciso8601.parse_datetime(dataMain["pushed_at"])
                             ),
                             inline=True,
                         )
@@ -727,7 +736,7 @@ class GitHub(commands.Cog):
         """Returns info on a user in GitHub"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             async with session.get(
