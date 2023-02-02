@@ -1,13 +1,14 @@
 import asyncio
 
 import aiohttp
+import ciso8601
 import discord
 import orjson
 import simdjson
 import uvloop
-from dateutil import parser
 from discord.commands import Option, SlashCommandGroup
 from discord.ext import commands, pages
+from discord.utils import format_dt
 from rin_exceptions import HTTPException, NoItemsError, NotFoundHTTPException
 
 jsonParser = simdjson.Parser()
@@ -543,25 +544,27 @@ class MAL(commands.Cog):
                                 embedVar.add_field(name=key, value=value, inline=True)
                         embedVar.add_field(
                             name="birthday",
-                            value=parser.isoparse(
-                                dataMain6["data"]["birthday"]
-                            ).strftime("%Y-%m-%d %H:%M:%S")
+                            value=format_dt(
+                                ciso8601.parse_datetime(dataMain6["data"]["birthday"])
+                            )
                             if dataMain6["data"]["birthday"] is not None
                             else "None",
                             inline=True,
                         )
                         embedVar.add_field(
                             name="joined",
-                            value=parser.isoparse(dataMain6["data"]["joined"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
+                            value=format_dt(
+                                ciso8601.parse_datetime(dataMain6["data"]["joined"])
                             ),
                             inline=True,
                         )
                         embedVar.add_field(
                             name="last_online",
-                            value=parser.isoparse(
-                                dataMain6["data"]["last_online"]
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                            value=format_dt(
+                                ciso8601.parse_datetime(
+                                    dataMain6["data"]["last_online"]
+                                )
+                            ),
                             inline=True,
                         )
                         await ctx.respond(embed=embedVar)

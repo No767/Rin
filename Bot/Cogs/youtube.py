@@ -2,19 +2,20 @@ import asyncio
 import os
 
 import aiohttp
+import ciso8601
 import discord
 import orjson
 import simdjson
 import uvloop
-from dateutil import parser
 from discord.commands import Option, SlashCommandGroup
 from discord.ext import commands, pages
+from discord.utils import format_dt
 from dotenv import load_dotenv
 from rin_exceptions import NoItemsError
 
 load_dotenv()
 
-YouTube_API_Key = os.getenv("YouTube_API_Key")
+YOUTUBE_API_KEY = os.getenv("YouTube_API_Key")
 
 jsonParser = simdjson.Parser()
 
@@ -32,7 +33,7 @@ class YouTube(commands.Cog):
         """Finds up to 25 videos on YouTube based on the given search term"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             params = {
-                "key": YouTube_API_Key,
+                "key": YOUTUBE_API_KEY,
                 "part": "snippet",
                 "type": "video",
                 "maxResults": "25",
@@ -63,16 +64,11 @@ class YouTube(commands.Cog):
                                 )
                                 .add_field(
                                     name="Published At (24hr)",
-                                    value=parser.isoparse(
-                                        dictItem["snippet"]["publishedAt"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Published At (12 hr)",
-                                    value=parser.isoparse(
-                                        dictItem["snippet"]["publishedAt"]
-                                    ).strftime("%Y-%m-%d %I:%M:%S %p"),
+                                    value=format_dt(
+                                        ciso8601.parse_datetime(
+                                            dictItem["snippet"]["publishedAt"]
+                                        )
+                                    ),
                                     inline=True,
                                 )
                                 .add_field(
@@ -102,7 +98,7 @@ class YouTube(commands.Cog):
         """Returns info about the given YouTube channel"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             search_params = {
-                "key": YouTube_API_Key,
+                "key": YOUTUBE_API_KEY,
                 "part": "snippet",
                 "type": "channel",
                 "maxResults": "1",
@@ -122,7 +118,7 @@ class YouTube(commands.Cog):
                     else:
                         channel_id = searchDataMain["items"][0]["id"]["channelId"]
                         params = {
-                            "key": YouTube_API_Key,
+                            "key": YOUTUBE_API_KEY,
                             "part": "snippet,statistics",
                             "id": channel_id,
                         }
@@ -174,9 +170,11 @@ class YouTube(commands.Cog):
                                             )
                                         embedVar.add_field(
                                             name="publishedAt",
-                                            value=parser.isoparse(
-                                                dictItem["snippet"]["publishedAt"]
-                                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                                            value=format_dt(
+                                                ciso8601.parse_datetime(
+                                                    dictItem["snippet"]["publishedAt"]
+                                                )
+                                            ),
                                             inline=True,
                                         )
                                         embedVar.add_field(
@@ -214,7 +212,7 @@ class YouTube(commands.Cog):
         """Returns up to 25 YouTube playlists based on the given YT channel"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             search_params = {
-                "key": YouTube_API_Key,
+                "key": YOUTUBE_API_KEY,
                 "part": "snippet",
                 "type": "playlists",
                 "maxResults": "1",
@@ -231,7 +229,7 @@ class YouTube(commands.Cog):
                     else:
                         channel_id = searchDataMain["items"][0]["id"]["channelId"]
                         main_params = {
-                            "key": YouTube_API_Key,
+                            "key": YOUTUBE_API_KEY,
                             "part": "snippet,contentDetails",
                             "channelId": channel_id,
                             "maxResults": 25,
@@ -273,16 +271,13 @@ class YouTube(commands.Cog):
                                             )
                                             .add_field(
                                                 name="Published At (24 hr)",
-                                                value=parser.isoparse(
-                                                    mainItems["snippet"]["publishedAt"]
-                                                ).strftime("%Y-%m-%d %H:%M:%S"),
-                                                inline=True,
-                                            )
-                                            .add_field(
-                                                name="Published At (12 hr, AM/PM)",
-                                                value=parser.isoparse(
-                                                    mainItems["snippet"]["publishedAt"]
-                                                ).strftime("%Y-%m-%d %I:%M:%S %p"),
+                                                value=format_dt(
+                                                    ciso8601.parse_datetime(
+                                                        mainItems["snippet"][
+                                                            "publishedAt"
+                                                        ]
+                                                    )
+                                                ),
                                                 inline=True,
                                             )
                                             .add_field(
@@ -324,7 +319,7 @@ class YouTube(commands.Cog):
     #     """Returns some info on the given YouTube video."""
     #     async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
     #         params = {
-    #             "key": YouTube_API_Key,
+    #             "key": YOUTUBE_API_KEY,
     #             "part": "snippet,status,statistics",
     #             "id": video_id,
     #             "maxResults": 1,
