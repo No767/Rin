@@ -38,7 +38,6 @@ Rin comes with integration from 20 services. Some of these services that are ful
 - YouTube
 - Waifu.IM
 - MangaDex
-- Twitch
 - GitHub
 
 And many more!
@@ -73,7 +72,7 @@ For Developers and Contributors:
 
 - [Top.gg](https://top.gg/bot/865883525932253184)
 - [Discords.com](https://discords.com/bots/bot/865883525932253184)
-- [Discord.bots.gg](https://discord.bots.gg/bots/865883525932253184) (Unverified)
+- [Discord.bots.gg](https://discord.bots.gg/bots/865883525932253184)
 - [Discord Labs](https://bots.discordlabs.org/bot/865883525932253184) (Unverified)
 
 [![Top.gg](https://top.gg/api/widget/865883525932253184.svg)](https://top.gg/bot/865883525932253184)

@@ -627,86 +627,89 @@ class MangaDex(commands.Cog):
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-    @md.command(name="read")
-    async def manga_read(
-        self,
-        ctx: discord.ApplicationContext,
-        name: Option(str, "The name of the manga"),
-    ):
-        """Reads a chapter out of the manga provided on MangaDex"""
-        async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-            params = {
-                "title": name,
-                "publicationDemographic[]": "none",
-                "contentRating[]": "safe",
-                "order[title]": "asc",
-                "limit": 25,
-                "includes[]": ["cover_art", "tags", "author"],
-            }
-            async with session.get(
-                f"https://api.mangadex.org/manga/", params=params
-            ) as r:
-                data = await r.content.read()
-                dataMain = jsonParser.parse(data, recursive=True)
-                mainPages = pages.Paginator(
-                    pages=[
-                        discord.Embed(
-                            title=formatMangaTitles(items["attributes"]["title"]),
-                            description=formatMangaDescriptions(
-                                items["attributes"]["description"]
-                            ),
-                        )
-                        .add_field(
-                            name="Alt Titles",
-                            value=formatAltTitles(items["attributes"]["altTitles"]),
-                        )
-                        .add_field(
-                            name="Author",
-                            value=[
-                                subItems["attributes"]["name"]
-                                for subItems in items["relationships"]
-                                if subItems["type"] == "author"
-                            ],
-                        )
-                        .add_field(
-                            name="Tags",
-                            value=[
-                                formatTags(tags["attributes"]["name"])
-                                for tags in items["attributes"]["tags"]
-                            ],
-                        )
-                        .add_field(name="Status", value=items["attributes"]["status"])
-                        .add_field(
-                            name="Created At",
-                            value=format_dt(
-                                ciso8601.parse_datetime(
-                                    items["attributes"]["createdAt"]
-                                )
-                            ),
-                        )
-                        .add_field(
-                            name="Updated At",
-                            value=format_dt(
-                                ciso8601.parse_datetime(
-                                    items["attributes"]["updatedAt"]
-                                )
-                            ),
-                        )
-                        .set_image(
-                            url=[
-                                f'https://uploads.mangadex.org/covers/{items["id"]}/{subItems["attributes"]["fileName"]}'
-                                for subItems in items["relationships"]
-                                if subItems["type"] == "cover_art"
-                            ][0]
-                        )
-                        for items in dataMain["data"]
-                    ],
-                )
-                # The current_pages one is bugged. it's always set to zero apparently
-                mainPages.custom_view = SelectMangaRead(
-                    mangaData=dataMain["data"], currPageNum=mainPages.current_page
-                )
-                await mainPages.respond(ctx.interaction)
+    # Mostly finished, but not production ready
+    # This will probably get deployed in v2.4.x instead of v2.3.x
+
+    # @md.command(name="read")
+    # async def manga_read(
+    #     self,
+    #     ctx: discord.ApplicationContext,
+    #     name: Option(str, "The name of the manga"),
+    # ):
+    #     """Reads a chapter out of the manga provided on MangaDex"""
+    #     async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
+    #         params = {
+    #             "title": name,
+    #             "publicationDemographic[]": "none",
+    #             "contentRating[]": "safe",
+    #             "order[title]": "asc",
+    #             "limit": 25,
+    #             "includes[]": ["cover_art", "tags", "author"],
+    #         }
+    #         async with session.get(
+    #             f"https://api.mangadex.org/manga/", params=params
+    #         ) as r:
+    #             data = await r.content.read()
+    #             dataMain = jsonParser.parse(data, recursive=True)
+    #             mainPages = pages.Paginator(
+    #                 pages=[
+    #                     discord.Embed(
+    #                         title=formatMangaTitles(items["attributes"]["title"]),
+    #                         description=formatMangaDescriptions(
+    #                             items["attributes"]["description"]
+    #                         ),
+    #                     )
+    #                     .add_field(
+    #                         name="Alt Titles",
+    #                         value=formatAltTitles(items["attributes"]["altTitles"]),
+    #                     )
+    #                     .add_field(
+    #                         name="Author",
+    #                         value=[
+    #                             subItems["attributes"]["name"]
+    #                             for subItems in items["relationships"]
+    #                             if subItems["type"] == "author"
+    #                         ],
+    #                     )
+    #                     .add_field(
+    #                         name="Tags",
+    #                         value=[
+    #                             formatTags(tags["attributes"]["name"])
+    #                             for tags in items["attributes"]["tags"]
+    #                         ],
+    #                     )
+    #                     .add_field(name="Status", value=items["attributes"]["status"])
+    #                     .add_field(
+    #                         name="Created At",
+    #                         value=format_dt(
+    #                             ciso8601.parse_datetime(
+    #                                 items["attributes"]["createdAt"]
+    #                             )
+    #                         ),
+    #                     )
+    #                     .add_field(
+    #                         name="Updated At",
+    #                         value=format_dt(
+    #                             ciso8601.parse_datetime(
+    #                                 items["attributes"]["updatedAt"]
+    #                             )
+    #                         ),
+    #                     )
+    #                     .set_image(
+    #                         url=[
+    #                             f'https://uploads.mangadex.org/covers/{items["id"]}/{subItems["attributes"]["fileName"]}'
+    #                             for subItems in items["relationships"]
+    #                             if subItems["type"] == "cover_art"
+    #                         ][0]
+    #                     )
+    #                     for items in dataMain["data"]
+    #                 ],
+    #             )
+    #             # The current_pages one is bugged. it's always set to zero apparently
+    #             mainPages.custom_view = SelectMangaRead(
+    #                 mangaData=dataMain["data"], currPageNum=mainPages.current_page
+    #             )
+    #             await mainPages.respond(ctx.interaction)
 
 
 def setup(bot):
