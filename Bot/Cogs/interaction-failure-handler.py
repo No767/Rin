@@ -1,7 +1,6 @@
 import traceback
 
 import discord
-from dateutil.parser import ParserError
 from discord.ext import commands
 
 
@@ -55,18 +54,13 @@ class InteractionFailureHandler(commands.Cog):
                 )
             )
         elif isinstance(error, discord.ApplicationCommandInvokeError):
-            if isinstance(error, ParserError):
-                await ctx.respond(
-                    "It seems like you probably have inputted the incorrect format for the datetime. Some examples of this include: `August 5, 2022 12:00`, `3-4-2022 13:30`, `2022-08-03 12:00 pm`"
-                )
-            else:
-                errorEmbed = discord.Embed(
-                    title="An error has occured",
-                    color=discord.Color.from_rgb(255, 41, 41),
-                )
-                errorEmbedHeader = "Uh oh! It seems like the command ran into an issue! For support, please issue an issue report on the [GitHub issues tracker](https://github.com/No767/Rin/issues)"
-                errorEmbed.description = f"{errorEmbedHeader}\n\n**Error:** ```{error.original}```\n**Full Exception Message:**\n```{self.fullException(error.original)}: {str(error.original)}```\n**Full Debug Traceback:**\n```{traceback.format_exc()}```"
-                await ctx.respond(embed=errorEmbed)
+            errorEmbed = discord.Embed(
+                title="An error has occured",
+                color=discord.Color.from_rgb(255, 41, 41),
+            )
+            errorEmbedHeader = "Uh oh! It seems like the command ran into an issue! For support, please issue an issue report on the [GitHub issues tracker](https://github.com/No767/Rin/issues)"
+            errorEmbed.description = f"{errorEmbedHeader}\n\n**Error:** ```{error.original}```\n**Full Exception Message:**\n```{self.fullException(error.original)}: {str(error.original)}```\n**Full Debug Traceback:**\n```{traceback.format_exc()}```"
+            await ctx.respond(embed=errorEmbed)
 
 
 def setup(bot):
