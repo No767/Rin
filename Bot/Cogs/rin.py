@@ -8,7 +8,7 @@ import uvloop
 from discord.commands import SlashCommandGroup
 from discord.ext import commands
 
-RIN_VERSION = "2.2.8"
+RIN_VERSION = "2.3.0"
 
 
 class Rin(commands.Cog):

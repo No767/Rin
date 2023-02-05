@@ -6,12 +6,12 @@ import uvloop
 from dotenv import load_dotenv
 from rincore import RinCore
 
-# Grabs the bot's token from the .env file
 load_dotenv()
 
-TOKEN = os.getenv("Testing_Bot_Token")
+TOKEN = os.getenv("TOKEN")
 intents = discord.Intents.default()
 intents.message_content = True
+
 bot = RinCore(intents=intents)
 
 logging.basicConfig(
