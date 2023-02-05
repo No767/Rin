@@ -332,60 +332,33 @@ class GitHub(commands.Cog):
                         data = await r.content.read()
                         dataMain = jsonParser.parse(data, recursive=True)
                         embed = discord.Embed()
-                        filter54 = [
-                            "user",
-                            "labels",
-                            "assignee",
-                            "assignee",
-                            "milestone",
-                            "pull_request",
-                            "closed_by",
-                            "title",
-                            "body",
-                            "url",
-                            "repository_url",
-                            "labels_url",
-                            "comments_url",
-                            "events_url",
-                            "assignees",
-                            "reactions",
-                            "created_at",
-                            "updated_at",
-                            "id",
-                            "node_id",
-                        ]
-                        for k, v in dict(dataMain).items():
-                            if k not in filter54:
-                                embed.add_field(name=k, value=v, inline=True)
-                        embed.add_field(
-                            name="Assignees",
-                            value=[
-                                itemMain5["login"]
-                                for itemMain5 in dataMain["assignees"]
-                            ],
-                            inline=True,
-                        )
-                        embed.add_field(
-                            name="Reporter",
-                            value=dataMain["user"]["login"],
-                            inline=True,
-                        )
                         embed.title = dataMain["title"]
                         embed.description = dataMain["body"]
                         embed.add_field(
-                            name="created at",
+                            name="User Profile", value=dataMain["user"]["html_url"]
+                        )
+                        embed.add_field(name="State", value=dataMain["state"])
+                        embed.add_field(
+                            name="Labels",
+                            value=str(dataMain["labels"]).replace("'", ""),
+                        )
+                        embed.add_field(
+                            name="Assignees",
+                            value=str(dataMain["assignees"]).replace("'", ""),
+                        )
+                        embed.add_field(
+                            name="Created At",
                             value=format_dt(
                                 ciso8601.parse_datetime(dataMain["created_at"])
                             ),
-                            inline=True,
                         )
                         embed.add_field(
-                            name="updated at",
+                            name="Updated At",
                             value=format_dt(
                                 ciso8601.parse_datetime(dataMain["updated_at"])
                             ),
-                            inline=True,
                         )
+                        embed.set_thumbnail(url=dataMain["user"]["avatar_url"])
                         await ctx.respond(embed=embed)
                 except HTTPException:
                     embedHTTPExceptionError = discord.Embed()
@@ -526,53 +499,83 @@ class GitHub(commands.Cog):
             ) as r:
                 data = await r.content.read()
                 dataMain = jsonParser.parse(data, recursive=True)
-                mainFilter = [
-                    "author",
-                    "assets",
-                    "body",
-                    "name",
-                    "url",
-                    "assets_url",
-                    "upload_url",
-                    "id",
-                    "node_id",
-                    "created_at",
-                    "published_at",
-                    "reactions",
-                ]
-                embed = discord.Embed()
                 try:
                     if r.status == 404:
                         raise HTTPException
                     else:
-                        for keys, value in dataMain.items():
-                            if keys not in mainFilter:
-                                embed.add_field(name=keys, value=value, inline=True)
-                        for mainItem in dataMain["assets"]:
-                            for k, v in mainItem.items():
-                                if k not in "uploader":
-                                    embed.add_field(name=k, value=v, inline=True)
-                        embed.add_field(
-                            name="author", value=dataMain["author"]["login"]
-                        )
-                        embed.title = dataMain["name"]
-                        embed.description = dataMain["body"]
-                        embed.set_thumbnail(url=dataMain["author"]["avatar_url"])
-                        embed.add_field(
-                            name="created_at",
-                            value=format_dt(
-                                ciso8601.parse_datetime(dataMain["created_at"])
+                        pageGroupsList = [
+                            pages.PageGroup(
+                                pages=[
+                                    discord.Embed(
+                                        title=dataMain["name"],
+                                        description=dataMain["body"],
+                                    )
+                                    .add_field(name="URL", value=dataMain["html_url"])
+                                    .add_field(
+                                        name="Pre-release?",
+                                        value=dataMain["prerelease"],
+                                    )
+                                    .add_field(name="Tag", value=dataMain["tag_name"])
+                                    .add_field(
+                                        name="Author", value=dataMain["author"]["login"]
+                                    )
+                                    .add_field(
+                                        name="Created At",
+                                        value=format_dt(
+                                            ciso8601.parse_datetime(
+                                                dataMain["created_at"]
+                                            )
+                                        ),
+                                    )
+                                    .add_field(
+                                        name="Updated At",
+                                        value=format_dt(
+                                            ciso8601.parse_datetime(
+                                                dataMain["published_at"]
+                                            )
+                                        )
+                                        if dataMain["published_at"] is not None
+                                        else "None",
+                                    )
+                                ],
+                                label="Release Information",
+                                description="Page for release information",
                             ),
-                            inline=True,
-                        )
-                        embed.add_field(
-                            name="published_at",
-                            value=format_dt(
-                                ciso8601.parse_datetime(dataMain["published_at"])
+                            pages.PageGroup(
+                                pages=[
+                                    discord.Embed(
+                                        title=item["name"], description=item["label"]
+                                    )
+                                    .add_field(
+                                        name="URL", value=item["browser_download_url"]
+                                    )
+                                    .add_field(
+                                        name="Uploader", value=item["uploader"]["login"]
+                                    )
+                                    .add_field(name="Size", value=item["size"])
+                                    .add_field(
+                                        name="Content Type", value=item["content_type"]
+                                    )
+                                    .add_field(
+                                        name="Download Count",
+                                        value=item["download_count"],
+                                    )
+                                    .add_field(
+                                        name="Created At",
+                                        value=format_dt(
+                                            ciso8601.parse_datetime(item["created_at"])
+                                        ),
+                                    )
+                                    for item in dataMain["assets"]
+                                ],
+                                label="Assets",
+                                description="Page for downloadable assets and information",
                             ),
-                            inline=True,
+                        ]
+                        mainPages = pages.Paginator(
+                            pages=pageGroupsList, show_menu=True, loop_pages=True
                         )
-                        await ctx.respond(embed=embed)
+                        await mainPages.respond(ctx.interaction)
                 except HTTPException:
                     embedHTTPExceptionError = discord.Embed()
                     embedHTTPExceptionError.description = "Sorry, but it seems like either there was no release or the repo doesn't exist. Please try again"
