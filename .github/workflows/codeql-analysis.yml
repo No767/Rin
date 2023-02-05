@@ -24,24 +24,23 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
-    - name: Set up Python 3.10
+    - name: Set up Python 3.11
       id: setup-python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v4.5.0
       with:
-        python-version: "3.10"
-    - name: Upgrade Pip + Install Pipenv
-      run: |
-        python3 -m pip install --upgrade pip pipenv
-    - name: Cache Pipenv
-      id: cache-pipenv
-      uses: actions/cache@v3
+        python-version: '3.11'
+    - name: Set up Poetry
+      uses: Gr1N/setup-poetry@v8
+    - name: Cache Poetry
+      id: cache-poetry
+      uses: actions/cache@v3.2.4
       with:
-          path: ~/.local/share/virtualenvs
-          key: ${{ runner.os }}-pipenv-v2-${{ hashFiles('**/Pipfile.lock') }}
-    - name: Install Pipenv Dependencies
-      if: steps.cache-pipenv.outputs.cache-hit != 'true'
+        path: ~/.cache/pypoetry/virtualenvs
+        key: ${{ runner.os }}-poetry-v3-${{ hashFiles('**/poetry.lock') }}
+    - name: Install Poetry Dependencies
+      if: steps.cache-poetry.outputs.cache-hit != 'true'
       run: |
-          pipenv install
+        poetry install
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
       with:
@@ -51,4 +50,3 @@ jobs:
       uses: github/codeql-action/analyze@v2
       with:
         upload: true
-

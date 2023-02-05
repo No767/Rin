@@ -1,0 +1,105 @@
+uuid,name,description,cog
+293a6e47-cae9-45a6-a42c-64d93ec26ab2,advice,Gives some advice from Adviceslip,AdviceSlip
+947c2ea0-a8ce-44b3-977b-5ab4479aae48,anilist search anime,Searches for up to 25 animes on AniList,AniList
+3e1677a2-dc69-443c-9b3d-3c88980d13bd,anilist search manga,Searches for up to 25 mangas on AniList,AniList
+93384341-98fe-4a2c-90a8-5c76b64c4cd6,anilist search tags,Searches up to 25 animes and mangas based on the given tag,AniList
+c3e135fa-dad7-4c6b-b7fe-254fccd426d5,anilist search users,Provides up to 25 users from the given username,AniList
+d9c8dc91-575d-4988-accf-019512a4e003,anilist search characters,Searches up to 25 anime characters on AniList,AniList
+095e8b14-a6d4-48ed-9c06-7ab253ab20ba,anilist search actors,Searches for up to 25 voice actors or staff that have worked on an anime and/or its characters,AniList
+de2b45fc-e4dc-4a6f-be3a-62e17e1e4497,anilist search,Search for anime on AniList,AniList
+ee74190b-1077-4c87-a06a-82641cca4b22,blue-alliance matches team,Returns the general info for each match that a team was in during the given event,BlueAlliance
+438380b0-68e5-413a-9538-636654570c12,blue-alliance matches all,Returns all of the matches for an FRC event,BlueAlliance
+047a0f86-6993-4259-a583-a4be72d994fb,blue-alliance matches,Blue Alliance match commands,BlueAlliance
+f3fd1b56-4003-432d-a470-f344082c6d72,blue-alliance teams info,Returns info about an FRC team,BlueAlliance
+14db1959-df0d-4a31-a92a-06bbda3e6e63,blue-alliance teams events,Returns what events an FRC team has attended,BlueAlliance
+48ddc1ef-f632-4813-a8e6-a20b17fc496f,blue-alliance teams,Blue Alliance team commands,BlueAlliance
+3d5d2fab-8c94-41c0-880d-9007f9952a4e,blue-alliance rankings,Returns the event ranking,BlueAlliance
+9c70abea-d4d2-47ab-b6c5-19d5badac93e,discordbots search bots,Searches for up to 25 of any Discord Bots listed on discord.bots.gg,DiscordBots
+585f4c83-127f-4285-a553-1e5b6c954a9b,discordbots search,Search for bots on Discord.bots.gg,DiscordBots
+31a37f95-09e8-48bd-903a-714a20509b5c,frc events list,Returns events for the current FRC season,FirstFRC
+70eb41f5-1c61-4041-9987-e7afd29930ee,frc events top,Returns the top 25 FRC teams within a given event,FirstFRC
+b7389d75-5bb3-4f84-8b8d-ac3907794fc3,frc events schedule,Returns the schedule for a given FRC event,FirstFRC
+a4aa6cc7-d8de-4e13-8ff0-6b2e6c3e0a1e,frc events alliances,Returns the alliances within an given event,FirstFRC
+dd9f4c0f-95dd-448a-afa0-cd67bca5fb40,frc events,Commands for Events,FirstFRC
+f5343604-f08c-4f1b-b1b5-73474bbafdb5,frc season,Returns the season summary for the current FRC season,FirstFRC
+f076aa58-1173-4e06-a0a4-939123929d82,frc score,Returns the FRC team's score details for a given event,FirstFRC
+8460627f-ffd2-4090-8645-4ac74c4a03ff,frc results,Returns the FRC team's results for a given event (the results of each matches that the team is in),FirstFRC
+383937a7-0e20-44ec-b4e6-881badb1169b,github user one,Returns info on a user in GitHub,GitHub
+60e087fd-b4d7-4226-9ea6-cca9cba27e49,github user,GitHub user commands,GitHub
+a23d506d-5a21-4f65-bb58-eed2e5718b10,github search repos,Searches for repositories on GitHub,GitHub
+cdeb1d1e-ade2-40c9-a628-5981f16b9e7f,github search users,Searches for users on GitHub,GitHub
+3669e61b-a69f-4549-b3f4-aae96240b676,github search,Search for repositories on GitHub,GitHub
+df87cfb0-0eac-4e07-8ec8-a0be90e2617f,github issues all,Gets all issues from a repo,GitHub
+a358c531-e755-4b76-9c77-c5c54ed80cf2,github issues one,Gets info about one issue on any repo on GitHub,GitHub
+dcaba6f3-b89a-452e-bb04-272efa667852,github issues,Search for issues on GitHub,GitHub
+2cf5a325-1dd5-49df-982b-5abd7263293f,github releases list,Lists out up to 25 releases of any repo,GitHub
+d459767d-4e7f-4dd2-9f36-e399f3ebd63b,github releases latest,Gets the latest published full release for any repo,GitHub
+ec6a83ce-90b1-4f44-a258-803bd0862116,github releases,Search for releases on GitHub,GitHub
+fd2ba9c0-2c41-47c6-b629-940378be1137,github repo,Returns info about any repo,GitHub
+3a2850c6-b38a-4fc1-962f-5ec60f8cba20,help,The help command page for Rin,Help
+4fe6c4e4-0018-41c4-9963-aa15fd752876,hypixel count,Returns the amount of players in each game server,Hypixel
+013f8924-3aaf-46a1-b61d-6c289e381743,hypixel punishments,Shows the stats for the amount of punishments given on Hypixel (All Users),Hypixel
+216e85e1-5f41-4390-a638-308935d92e18,jisho search,Searches for words on Jisho,Jisho
+1dfc4225-2665-4aee-b827-014e195220ed,mangadex search manga,Searches for up to 25 manga on MangaDex,MangaDex
+01580263-cbd2-4408-b7d9-6c283350db93,mangadex search scanlation,Returns up to 25 scanlation groups via the name given,MangaDex
+2af6ceb0-8a2a-4d97-a093-213c018573e7,mangadex search author,Returns up to 25 authors and their info,MangaDex
+31f4ce52-2d0b-4911-ab74-6dd4a3d581b5,mangadex search,Search for stuff on MangaDex,MangaDex
+e693dd01-e4e6-4f40-adf8-764f72384813,mangadex scanlation,Commands for the scanlation section,MangaDex
+4db12af1-7276-402d-8b57-a5f18b75df83,mangadex random,Returns an random manga from MangaDex,MangaDex
+c2710a87-4a87-48b5-af4b-990c61df2ad7,minecraft java,Checks and returns info about the given Minecraft Java server,McSrvStats
+40b6101f-781c-4243-bb9a-6245a2a5e4dd,minecraft bedrock,Returns the status and info of any Bedrock or Geyser-compatible server,McSrvStats
+03c6b189-dafb-464e-b862-cef59774d1a8,modrinth mod list,Gets info about the mod requested,Modrinth
+5ede1dde-0a67-4420-9566-f9a9e6802f8a,modrinth mod,Commands for mods,Modrinth
+5a794ccc-10c2-4c87-b68e-bb9e61708998,modrinth versions all,Lists out all of the versions for a mod,Modrinth
+ae2b4696-f973-4086-9490-07a98de06911,modrinth versions,Commands for mod versions,Modrinth
+ac91f8d7-e395-4686-8dba-abfb7ffa74bb,modrinth user search,Returns info on the given user,Modrinth
+92dc7619-23bf-4c45-bfdb-db35b010192c,modrinth user projects,Returns info on the given user's projects,Modrinth
+187a8609-53a7-455c-9b09-73ebb21714a4,modrinth user,Commands for users,Modrinth
+68f19dc0-6a13-435a-8a82-b5ad33121465,modrinth search,Searches for up to 25 mods on Modrinth,Modrinth
+7d87b2c8-b313-4b1c-abdf-b207c673ac14,mal search anime,Fetches up to 25 anime from MAL,MAL
+4411fe34-cccf-4c8f-ac0e-21d81bc2ecfc,mal search manga,Fetches up to 25 mangas from MAL,MAL
+1bff0a0a-3eb9-4dac-9683-2da6c3fa6fae,mal search,Search for anime/manga on MyAnimeList,MAL
+3793356b-2921-4254-8fad-7aac1f0df2ea,mal seasons list,Returns animes for the given season and year,MAL
+d2f8d6a8-b3ba-4bd9-b581-301373b6d45d,mal seasons upcoming,Returns anime for the upcoming season,MAL
+c9cd9716-c896-421b-beb3-4404e4d798a9,mal seasons,Sub commands for anime seasons,MAL
+5728f476-3dd7-472b-a616-4a4c6987c921,mal random anime,Fetches a random anime from MAL,MAL
+657a6411-9252-4ae1-aa95-02b6cf3e0a88,mal random manga,Fetches a random manga from MAL,MAL
+bb95ddb5-8118-4fb9-88bc-6687c0ed2c57,mal random,Random Anime/Manga Commands,MAL
+ac167290-3227-4072-881e-bf697b5ecb0f,mal user,Returns info about the given user on MAL,MAL
+504c2b7f-e375-4ccf-8607-96a6d76442c1,reddit users info,Provides info about a Redditor,Reddit
+beb08312-138c-4508-a027-d8bbb8a74264,reddit users comments,Returns up to 25 comments from a given Redditor,Reddit
+e917525e-5f47-43a0-b5b7-2356c6ec78d2,reddit users,Subgroup for Reddit Users,Reddit
+995de958-05b5-4a92-9c58-b0b0553202ba,reddit search,Searches on Reddit for Content,Reddit
+9bd64301-fcff-4c85-9f7b-20c73efa3421,reddit memes,Gets some memes from Reddit,Reddit
+4e85ad33-b600-4a94-871f-39ddc13a5587,reddit feed,Returns up to 25 reddit posts based on the current filter,Reddit
+c4fe704a-aa19-4f65-87a0-f0bd2f19e077,reddit egg_irl,Literally just shows you r/egg_irl posts. No comment.,Reddit
+5d09513a-995b-4d82-98bd-3263fa29863d,rin uptime,Returns how long Rin has been online for,Rin
+cd1c60b3-681e-4ddc-ba68-da62230fac48,rin stats,Displays some basic stats about Rin,Rin
+56e83d84-c1f3-4723-8914-d637668cdf08,rin invite,Returns invite link for Rin,Rin
+9bd61ea1-8022-4758-8997-17dd3bc6969c,rin ping,Returns Rin's ping,Rin
+3274e32b-aaf9-4761-983e-656597bcdb1c,rin version,Returns Rin's current version,Rin
+17695e75-9b51-4a19-9d18-8e97c2b873b6,spigot search,Finds up to 25 plugins matching the name of the given plugin,Spigot
+0e8594c3-5e89-4234-a8c3-565f1526595c,tenor search multiple,Searches for up to 25 gifs on Tenor,Tenor
+5510c95a-d38e-4890-a99f-130140850ada,tenor search one,Searches for a single gif on Tenor,Tenor
+96eb4868-bdc3-461d-b5a9-7db51e1c6abb,tenor search suggestions,Gives a list of suggested search terms based on the given topic,Tenor
+6399dcd5-2ba5-4dac-8eb2-17822942c1bc,tenor search,Search Tenor,Tenor
+64f49823-4b43-468c-bf0e-bfc10e2c8585,tenor trending terms,Gives a list of trending search terms on Tenor,Tenor
+14b08c55-9893-4ae2-aa87-967a426b8319,tenor trending,Trending Tenor,Tenor
+b8b929a8-d7ec-4d95-b788-ff7c950673e9,tenor featured,Returns up to 25 featured gifs from Tenor,Tenor
+d0b0c2b0-e694-4b80-a1c2-413bcb48d9c1,tenor random,Gives out 25 random gifs from Tenor based on given search term,Tenor
+1326b044-d1a7-4ff2-a273-871b36711026,topgg search bot,Searches up to 25 bots on Top.gg,TopGG
+7b8e5095-2b6d-4d95-a843-e77537fc079b,topgg search,Searches for an item on Top.gg,TopGG
+61eb67f4-c881-4db3-8309-13356a42dd14,twitch search channels,Returns up to 25 streams from the given channel,Twitch
+870bd082-c4ea-4ab5-a547-9f46ee6f741f,twitch search,Search for stuff on Twitch,Twitch
+da2b708b-eb92-407e-ade1-1396e353f3bd,twitch top games,Gets the top 100 games on Twitch,Twitch
+f3adfd4e-db7c-4362-afa7-10f18791b349,twitch top,Top stuff on Twitch,Twitch
+c1381a43-c2ee-43b0-92cc-85be7b473634,twitch streams,Gets up to 25 active streams on Twitch,Twitch
+6f53f594-52ac-41b0-9e66-9134b6c5f943,twitter search,Returns up to 25 recent tweets from the given the Twitter user,Twitter
+5f440f3c-5e50-4127-b3ae-643803dc765a,twitter user,Returns Info about the given Twitter user,Twitter
+22968616-942d-439f-855b-a03557bdd94b,waifu random one,Gets one random waifu pics,Waifu
+a4532060-77a5-459f-8a44-895d8129e0d9,waifu random many,Returns many random waifu pics,Waifu
+1128ac3a-10c8-46a3-acd5-d8c64d2d0d0c,waifu random,Get a random waifu,Waifu
+5579c021-3b20-4050-adee-057a46a5e282,waifu pics,Returns a random image of a waifu from waifu.pics,Waifu
+d7da6491-d87a-421e-a416-64dca2d3ea50,youtube search,Finds up to 25 videos on YouTube based on the given search term,YouTube
+835caaa2-502c-47f4-bffe-ae7f635187e3,youtube channel,Returns info about the given YouTube channel,YouTube
+3be22dbf-6c00-41f5-a343-21547918cd9b,youtube playlist,Returns up to 25 YouTube playlists based on the given YT channel,YouTube

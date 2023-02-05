@@ -2,13 +2,14 @@ import asyncio
 import os
 
 import aiohttp
+import ciso8601
 import discord
 import orjson
 import simdjson
 import uvloop
-from dateutil import parser
 from discord.commands import Option, SlashCommandGroup
 from discord.ext import commands, pages
+from discord.utils import format_dt
 from dotenv import load_dotenv
 from rin_exceptions import HTTPException, NoItemsError
 
@@ -16,7 +17,7 @@ jsonParser = simdjson.Parser()
 
 load_dotenv()
 
-githubAPIKey = os.getenv("GitHub_API_Access_Token")
+GITHUB_API_KEY = os.getenv("GitHub_API_Access_Token")
 
 
 class GitHub(commands.Cog):
@@ -36,7 +37,7 @@ class GitHub(commands.Cog):
         """Searches for repositories on GitHub"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             params = {"q": repo, "sort": "stars", "order": "desc", "per_page": 25}
@@ -73,9 +74,11 @@ class GitHub(commands.Cog):
                                     )
                                     .add_field(
                                         name="Creation Date",
-                                        value=parser.isoparse(
-                                            mainItem["created_at"]
-                                        ).strftime("%Y-%m-%d %H:%M:%S"),
+                                        value=format_dt(
+                                            ciso8601.parse_datetime(
+                                                mainItem["created_at"]
+                                            )
+                                        ),
                                         inline=True,
                                     )
                                     .add_field(
@@ -124,7 +127,7 @@ class GitHub(commands.Cog):
         """Searches for users on GitHub"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             params = {"q": user, "sort": "stars", "order": "desc", "per_page": 25}
@@ -187,7 +190,7 @@ class GitHub(commands.Cog):
         """Gets all issues from a repo"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             params = {
@@ -235,16 +238,20 @@ class GitHub(commands.Cog):
                                         )
                                         .add_field(
                                             name="Issue Created",
-                                            value=parser.isoparse(
-                                                mainItem3["created_at"]
-                                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                                            value=format_dt(
+                                                ciso8601.parse_datetime(
+                                                    mainItem3["created_at"]
+                                                )
+                                            ),
                                             inline=True,
                                         )
                                         .add_field(
                                             name="Issue Updated",
-                                            value=parser.isoparse(
-                                                mainItem3["updated_at"]
-                                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                                            value=format_dt(
+                                                ciso8601.parse_datetime(
+                                                    mainItem3["updated_at"]
+                                                )
+                                            ),
                                             inline=True,
                                         )
                                         .add_field(
@@ -311,7 +318,7 @@ class GitHub(commands.Cog):
         """Gets info about one issue on any repo on GitHub"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             async with session.get(
@@ -325,60 +332,33 @@ class GitHub(commands.Cog):
                         data = await r.content.read()
                         dataMain = jsonParser.parse(data, recursive=True)
                         embed = discord.Embed()
-                        filter54 = [
-                            "user",
-                            "labels",
-                            "assignee",
-                            "assignee",
-                            "milestone",
-                            "pull_request",
-                            "closed_by",
-                            "title",
-                            "body",
-                            "url",
-                            "repository_url",
-                            "labels_url",
-                            "comments_url",
-                            "events_url",
-                            "assignees",
-                            "reactions",
-                            "created_at",
-                            "updated_at",
-                            "id",
-                            "node_id",
-                        ]
-                        for k, v in dict(dataMain).items():
-                            if k not in filter54:
-                                embed.add_field(name=k, value=v, inline=True)
-                        embed.add_field(
-                            name="Assignees",
-                            value=[
-                                itemMain5["login"]
-                                for itemMain5 in dataMain["assignees"]
-                            ],
-                            inline=True,
-                        )
-                        embed.add_field(
-                            name="Reporter",
-                            value=dataMain["user"]["login"],
-                            inline=True,
-                        )
                         embed.title = dataMain["title"]
                         embed.description = dataMain["body"]
                         embed.add_field(
-                            name="created at",
-                            value=parser.isoparse(dataMain["created_at"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
-                            ),
-                            inline=True,
+                            name="User Profile", value=dataMain["user"]["html_url"]
+                        )
+                        embed.add_field(name="State", value=dataMain["state"])
+                        embed.add_field(
+                            name="Labels",
+                            value=str(dataMain["labels"]).replace("'", ""),
                         )
                         embed.add_field(
-                            name="updated at",
-                            value=parser.isoparse(dataMain["updated_at"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
-                            ),
-                            inline=True,
+                            name="Assignees",
+                            value=str(dataMain["assignees"]).replace("'", ""),
                         )
+                        embed.add_field(
+                            name="Created At",
+                            value=format_dt(
+                                ciso8601.parse_datetime(dataMain["created_at"])
+                            ),
+                        )
+                        embed.add_field(
+                            name="Updated At",
+                            value=format_dt(
+                                ciso8601.parse_datetime(dataMain["updated_at"])
+                            ),
+                        )
+                        embed.set_thumbnail(url=dataMain["user"]["avatar_url"])
                         await ctx.respond(embed=embed)
                 except HTTPException:
                     embedHTTPExceptionError = discord.Embed()
@@ -398,7 +378,7 @@ class GitHub(commands.Cog):
         """Lists out up to 25 releases of any repo"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             params = {"per_page": 25}
@@ -430,16 +410,18 @@ class GitHub(commands.Cog):
                                     )
                                     .add_field(
                                         name="Created At",
-                                        value=parser.isoparse(
+                                        value=ciso8601.parse_datetime(
                                             dictItem5["created_at"]
-                                        ).strftime("%Y-%m-%d %H:%M:%S"),
+                                        ),
                                         inline=True,
                                     )
                                     .add_field(
                                         name="Published At",
-                                        value=parser.isoparse(
-                                            dictItem5["published_at"]
-                                        ).strftime("%Y-%m-%d %H:%M:%S"),
+                                        value=format_dt(
+                                            ciso8601.parse_datetime(
+                                                dictItem5["published_at"]
+                                            )
+                                        ),
                                         inline=True,
                                     )
                                     .add_field(
@@ -508,7 +490,7 @@ class GitHub(commands.Cog):
         """Gets the latest published full release for any repo"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             async with session.get(
@@ -517,53 +499,83 @@ class GitHub(commands.Cog):
             ) as r:
                 data = await r.content.read()
                 dataMain = jsonParser.parse(data, recursive=True)
-                mainFilter = [
-                    "author",
-                    "assets",
-                    "body",
-                    "name",
-                    "url",
-                    "assets_url",
-                    "upload_url",
-                    "id",
-                    "node_id",
-                    "created_at",
-                    "published_at",
-                    "reactions",
-                ]
-                embed = discord.Embed()
                 try:
                     if r.status == 404:
                         raise HTTPException
                     else:
-                        for keys, value in dataMain.items():
-                            if keys not in mainFilter:
-                                embed.add_field(name=keys, value=value, inline=True)
-                        for mainItem in dataMain["assets"]:
-                            for k, v in mainItem.items():
-                                if k not in "uploader":
-                                    embed.add_field(name=k, value=v, inline=True)
-                        embed.add_field(
-                            name="author", value=dataMain["author"]["login"]
-                        )
-                        embed.title = dataMain["name"]
-                        embed.description = dataMain["body"]
-                        embed.set_thumbnail(url=dataMain["author"]["avatar_url"])
-                        embed.add_field(
-                            name="created_at",
-                            value=parser.isoparse(dataMain["created_at"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
+                        pageGroupsList = [
+                            pages.PageGroup(
+                                pages=[
+                                    discord.Embed(
+                                        title=dataMain["name"],
+                                        description=dataMain["body"],
+                                    )
+                                    .add_field(name="URL", value=dataMain["html_url"])
+                                    .add_field(
+                                        name="Pre-release?",
+                                        value=dataMain["prerelease"],
+                                    )
+                                    .add_field(name="Tag", value=dataMain["tag_name"])
+                                    .add_field(
+                                        name="Author", value=dataMain["author"]["login"]
+                                    )
+                                    .add_field(
+                                        name="Created At",
+                                        value=format_dt(
+                                            ciso8601.parse_datetime(
+                                                dataMain["created_at"]
+                                            )
+                                        ),
+                                    )
+                                    .add_field(
+                                        name="Updated At",
+                                        value=format_dt(
+                                            ciso8601.parse_datetime(
+                                                dataMain["published_at"]
+                                            )
+                                        )
+                                        if dataMain["published_at"] is not None
+                                        else "None",
+                                    )
+                                ],
+                                label="Release Information",
+                                description="Page for release information",
                             ),
-                            inline=True,
-                        )
-                        embed.add_field(
-                            name="published_at",
-                            value=parser.isoparse(dataMain["published_at"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
+                            pages.PageGroup(
+                                pages=[
+                                    discord.Embed(
+                                        title=item["name"], description=item["label"]
+                                    )
+                                    .add_field(
+                                        name="URL", value=item["browser_download_url"]
+                                    )
+                                    .add_field(
+                                        name="Uploader", value=item["uploader"]["login"]
+                                    )
+                                    .add_field(name="Size", value=item["size"])
+                                    .add_field(
+                                        name="Content Type", value=item["content_type"]
+                                    )
+                                    .add_field(
+                                        name="Download Count",
+                                        value=item["download_count"],
+                                    )
+                                    .add_field(
+                                        name="Created At",
+                                        value=format_dt(
+                                            ciso8601.parse_datetime(item["created_at"])
+                                        ),
+                                    )
+                                    for item in dataMain["assets"]
+                                ],
+                                label="Assets",
+                                description="Page for downloadable assets and information",
                             ),
-                            inline=True,
+                        ]
+                        mainPages = pages.Paginator(
+                            pages=pageGroupsList, show_menu=True, loop_pages=True
                         )
-                        await ctx.respond(embed=embed)
+                        await mainPages.respond(ctx.interaction)
                 except HTTPException:
                     embedHTTPExceptionError = discord.Embed()
                     embedHTTPExceptionError.description = "Sorry, but it seems like either there was no release or the repo doesn't exist. Please try again"
@@ -582,7 +594,7 @@ class GitHub(commands.Cog):
         """Returns info about any repo"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             async with session.get(
@@ -690,22 +702,22 @@ class GitHub(commands.Cog):
                                 )
                         embedMain.add_field(
                             name="created_at",
-                            value=parser.isoparse(dataMain["created_at"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
+                            value=format_dt(
+                                ciso8601.parse_datetime(dataMain["created_at"])
                             ),
                             inline=True,
                         )
                         embedMain.add_field(
                             name="updated_at",
-                            value=parser.isoparse(dataMain["updated_at"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
+                            value=format_dt(
+                                ciso8601.parse_datetime(dataMain["updated_at"])
                             ),
                             inline=True,
                         )
                         embedMain.add_field(
                             name="pushed_at",
-                            value=parser.isoparse(dataMain["pushed_at"]).strftime(
-                                "%Y-%m-%d %H:%M:%S"
+                            value=format_dt(
+                                ciso8601.parse_datetime(dataMain["pushed_at"])
                             ),
                             inline=True,
                         )
@@ -727,7 +739,7 @@ class GitHub(commands.Cog):
         """Returns info on a user in GitHub"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             headers = {
-                "Authorization": f"token {githubAPIKey}",
+                "Authorization": f"token {GITHUB_API_KEY}",
                 "accept": "application/vnd.github.v3+json",
             }
             async with session.get(

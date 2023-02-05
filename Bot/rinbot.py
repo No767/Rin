@@ -1,17 +1,18 @@
 import logging
 import os
-from pathlib import Path
 
 import discord
-from discord.ext import commands
+import uvloop
 from dotenv import load_dotenv
+from rincore import RinCore
 
-# Grabs the bot's token from the .env file
 load_dotenv()
+
 TOKEN = os.getenv("TOKEN")
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(intents=intents, help_command=None)
+
+bot = RinCore(intents=intents)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,21 +21,6 @@ logging.basicConfig(
 )
 logging.getLogger("gql").setLevel(logging.WARNING)
 
-# Loads all Cogs from the Cogs folder
-path = Path(__file__).parent.resolve()
-cogsList = os.listdir(os.path.join(path, "Cogs"))
-for items in cogsList:
-    if items.endswith(".py"):
-        bot.load_extension(f"Cogs.{items[:-3]}")
-
-# Adds in the bot presence
-@bot.event
-async def on_ready():
-    logging.info(f"{bot.user.name} is ready to go!")
-    await bot.change_presence(
-        activity=discord.Activity(type=discord.ActivityType.watching, name="/help")
-    )
-
-
-# Run the bot
-bot.run(TOKEN)
+if __name__ == "__main__":
+    uvloop.install()
+    bot.run(TOKEN)

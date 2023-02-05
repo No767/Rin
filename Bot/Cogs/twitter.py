@@ -2,13 +2,14 @@ import asyncio
 import os
 
 import aiohttp
+import ciso8601
 import discord
 import orjson
 import simdjson
 import uvloop
-from dateutil import parser
 from discord.commands import Option, SlashCommandGroup
 from discord.ext import commands, pages
+from discord.utils import format_dt
 from dotenv import load_dotenv
 from rin_exceptions import NoItemsError
 
@@ -64,16 +65,9 @@ class Twitter(commands.Cog):
                                 )
                                 .add_field(
                                     name="Created At (UTC, 24hr)",
-                                    value=parser.isoparse(
-                                        mainItem["created_at"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Created At (UTC, 12hr)",
-                                    value=parser.isoparse(
-                                        mainItem["created_at"]
-                                    ).strftime("%Y-%m-%d %I:%M:%S %p"),
+                                    value=format_dt(
+                                        ciso8601.parse_datetime(mainItem["created_at"])
+                                    ),
                                     inline=True,
                                 )
                                 .add_field(

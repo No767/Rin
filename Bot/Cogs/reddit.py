@@ -12,6 +12,7 @@ import uvloop
 from asyncprawcore.exceptions import NotFound
 from discord.commands import Option, SlashCommandGroup
 from discord.ext import commands, pages
+from discord.utils import format_dt
 from dotenv import load_dotenv
 from numpy.random import default_rng
 from rin_exceptions import NoItemsError
@@ -46,7 +47,7 @@ class Reddit(commands.Cog):
         async with asyncpraw.Reddit(
             client_id=Reddit_ID,
             client_secret=Reddit_Secret,
-            user_agent="alpine:rin:v2.2.4 (by /u/No767)",
+            user_agent="debian:rin:v2.3 (by /u/No767)",
         ) as api:
             sub = "all"
             try:
@@ -109,16 +110,9 @@ class Reddit(commands.Cog):
                         )
                         reddit_embed.add_field(
                             name="Created At (UTC, 24hr)",
-                            value=datetime.datetime.fromtimestamp(
-                                submission.created_utc
-                            ).strftime("%Y-%m-%d %H:%M"),
-                            inline=True,
-                        )
-                        reddit_embed.add_field(
-                            name="Created At (UTC, 12hr or AM/PM)",
-                            value=datetime.datetime.fromtimestamp(
-                                submission.created_utc
-                            ).strftime("%Y-%m-%d %I:%M %p"),
+                            value=format_dt(
+                                datetime.datetime.fromtimestamp(submission.created_utc)
+                            ),
                             inline=True,
                         )
                         await ctx.respond(embed=reddit_embed)
@@ -231,7 +225,7 @@ class Reddit(commands.Cog):
         async with asyncpraw.Reddit(
             client_id=Reddit_ID,
             client_secret=Reddit_Secret,
-            user_agent="alpine:rin:v2.2.4 (by /u/No767)",
+            user_agent="debian:rin:v2.3 (by /u/No767)",
         ) as redditapi:
             try:
                 try:
@@ -272,16 +266,9 @@ class Reddit(commands.Cog):
                         )
                         .add_field(
                             name="Created At (UTC, 24hr)",
-                            value=datetime.datetime.fromtimestamp(
-                                submission.created_utc
-                            ).strftime("%Y-%m-%d %H:%M"),
-                            inline=True,
-                        )
-                        .add_field(
-                            name="Created At (UTC, 12hr or AM/PM)",
-                            value=datetime.datetime.fromtimestamp(
-                                submission.created_utc
-                            ).strftime("%Y-%m-%d %I:%M %p"),
+                            value=format_dt(
+                                datetime.datetime.fromtimestamp(submission.created_utc)
+                            ),
                             inline=True,
                         )
                         .set_image(url=submission.url)
@@ -311,7 +298,7 @@ class Reddit(commands.Cog):
         async with asyncpraw.Reddit(
             client_id=Reddit_ID,
             client_secret=Reddit_Secret,
-            user_agent="alpine:rin:v2.2.4 (by /u/No767)",
+            user_agent="debian:rin:v2.3 (by /u/No767)",
         ) as redditorApi:
             user = redditor
             try:
@@ -329,16 +316,9 @@ class Reddit(commands.Cog):
                     )
                     embedVar.add_field(
                         name="Created At (UTC, 24hr)",
-                        value=datetime.datetime.fromtimestamp(
-                            mainUser.created_utc
-                        ).strftime("%Y-%m-%d %H:%M"),
-                        inline=True,
-                    )
-                    embedVar.add_field(
-                        name="Created At (UTC, 12hr or AM/PM)",
-                        value=datetime.datetime.fromtimestamp(
-                            mainUser.created_utc
-                        ).strftime("%Y-%m-%d %I:%M %p"),
+                        value=format_dt(
+                            datetime.datetime.fromtimestamp(mainUser.created_utc)
+                        ),
                         inline=True,
                     )
                     embedVar.add_field(
@@ -371,7 +351,7 @@ class Reddit(commands.Cog):
         async with asyncpraw.Reddit(
             client_id=Reddit_ID,
             client_secret=Reddit_Secret,
-            user_agent="alpine:rin:v2.2.4 (by /u/No767)",
+            user_agent="debian:rin:v2.3 (by /u/No767)",
         ) as redditorCommentsAPI:
             user = redditor
             try:
@@ -386,16 +366,9 @@ class Reddit(commands.Cog):
                         )
                         .add_field(
                             name="Created At (UTC, 24hr)",
-                            value=datetime.datetime.fromtimestamp(
-                                comment.created_utc
-                            ).strftime("%Y-%m-%d %H:%M"),
-                            inline=True,
-                        )
-                        .add_field(
-                            name="Created At (UTC, 12hr or AM/PM)",
-                            value=datetime.datetime.fromtimestamp(
-                                comment.created_utc
-                            ).strftime("%Y-%m-%d %I:%M %p"),
+                            value=format_dt(
+                                datetime.datetime.fromtimestamp(comment.created_utc)
+                            ),
                             inline=True,
                         )
                         .add_field(name="Score", value=comment.score, inline=True)
@@ -447,7 +420,7 @@ class Reddit(commands.Cog):
         async with asyncpraw.Reddit(
             client_id=Reddit_ID,
             client_secret=Reddit_Secret,
-            user_agent="alpine:rin:v2.2.4 (by /u/No767)",
+            user_agent="debian:rin:v2.3 (by /u/No767)",
         ) as redditapi:
             try:
                 mainSub = await redditapi.subreddit("egg_irl")
@@ -481,16 +454,9 @@ class Reddit(commands.Cog):
                         )
                         .add_field(
                             name="Created At (UTC, 24hr)",
-                            value=datetime.datetime.fromtimestamp(
-                                submission.created_utc
-                            ).strftime("%Y-%m-%d %H:%M"),
-                            inline=True,
-                        )
-                        .add_field(
-                            name="Created At (UTC, 12hr or AM/PM)",
-                            value=datetime.datetime.fromtimestamp(
-                                submission.created_utc
-                            ).strftime("%Y-%m-%d %I:%M %p"),
+                            value=format_dt(
+                                datetime.datetime.fromtimestamp(submission.created_utc)
+                            ),
                             inline=True,
                         )
                         .set_image(url=submission.url)

@@ -6,8 +6,8 @@
 
 <br/>
 
-![GitHub Pipenv locked Python version (branch)](https://img.shields.io/github/pipenv/locked/python-version/No767/Rin/dev?label=Python&logo=python&logoColor=white) 
-[![CodeQL](https://github.com/No767/Rin/actions/workflows/codeql-analysis.yml/badge.svg?branch=dev)](https://github.com/No767/Rin/actions/workflows/codeql-analysis.yml) [![Snyk](https://github.com/No767/Rin/actions/workflows/snyk.yml/badge.svg?branch=dev)](https://github.com/No767/Rin/actions/workflows/snyk.yml) [![Docker Build (GHCR)](https://github.com/No767/Rin/actions/workflows/docker-build-ghcr.yml/badge.svg)](https://github.com/No767/Rin/actions/workflows/docker-build-ghcr.yml) [![Docker Build (Hub)](https://github.com/No767/Rin/actions/workflows/docker-build-hub.yml/badge.svg)](https://github.com/No767/Rin/actions/workflows/docker-build-hub.yml) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/ec2cf4ceacc746b3a4570d324c843a4b)](https://www.codacy.com/gh/No767/Rin/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=No767/Rin&amp;utm_campaign=Badge_Grade) [![Open in GitPod](https://img.shields.io/badge/Open%20in%20-GitPod-blue?logo=gitpod)](https://gitpod.io/#https://github.com/No767/Rin) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/No767/Rin?label=Release&logo=github) ![GitHub](https://img.shields.io/github/license/No767/Rin?label=License&logo=github)
+[![Required Python Version](https://img.shields.io/badge/Python-3.10%20|%203.11-blue?logo=python&logoColor=white)](https://github.com/No767/Rin/blob/dev/pyproject.toml)
+[![CodeQL](https://github.com/No767/Rin/actions/workflows/codeql-analysis.yml/badge.svg?branch=dev)](https://github.com/No767/Rin/actions/workflows/codeql-analysis.yml) [![Docker Build](https://github.com/No767/Rin/actions/workflows/docker-build.yml/badge.svg)](https://github.com/No767/Rin/actions/workflows/docker-build.yml) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/ec2cf4ceacc746b3a4570d324c843a4b)](https://www.codacy.com/gh/No767/Rin/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=No767/Rin&amp;utm_campaign=Badge_Grade) [![Open in GitPod](https://img.shields.io/badge/Open%20in%20-GitPod-blue?logo=gitpod)](https://gitpod.io/#https://github.com/No767/Rin) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/No767/Rin?label=Release&logo=github) ![GitHub](https://img.shields.io/github/license/No767/Rin?label=License&logo=github)
 
 A Discord bot focused on obtaining data from third-party services with lighting performance in mind
 
@@ -17,7 +17,7 @@ A Discord bot focused on obtaining data from third-party services with lighting 
 
 Rin is a Discord bot written with Pycord and Python, and is focused on fetching data from third-party services with lighting performance in mind. For example, you could look up some memes with the Reddit service, 
 or find your favorite anime with the MyAnimeList service. Rin supports a lot of services, such as Twitter, MangaDex, Reddit, YouTube, Hypixel, and many more. Rin is also designed to be fast, and uses [Uvloop](https://github.com/MagicStack/uvloop) under the 
-hood, which is 2 times faster than Node.js and reaches the same speeds as many Go programs. On top on that, Rin is powered by the fatest JSON parser in the world, SIMDJSON. For more info, please check out the [Docs](https://docs.rinbot.live/).
+hood, which is 2 times faster than Node.js and reaches the same speeds as many Go programs. On top on that, Rin is powered by the fatest JSON parser in the world, SIMDJSON. For more info, please check out the [Docs](https://rin-docs.vercel.app/).
 
 **For the future of Rin, please see this [gist](https://gist.github.com/No767/de27c61dc471ac331a45ea7c2bda62c0).**
 ## Modularity
@@ -38,7 +38,6 @@ Rin comes with integration from 20 services. Some of these services that are ful
 - YouTube
 - Waifu.IM
 - MangaDex
-- Twitch
 - GitHub
 
 And many more!
@@ -57,23 +56,22 @@ if you would like to get started, here are some links to help you with that:
 
 For end-users:
 - [Getting Started Guide](./Community/getting-started-guide.md)
-- [Documentation](https://docs.rinbot.live)
+- [Documentation](https://rin-docs.vercel.app/)
 
 For Developers and Contributors:
-- [Getting Started (For Developers)](https://github.com/No767/Rin/blob/dev/Community/getting-started-rin.md)
-- [Contributing](https://github.com/No767/Rin/blob/dev/Community/contributing.md)
-- [Documentation](https://docs.rinbot.live)
+- [Contributing](./Community/contributing.md)
+- [Documentation](https://rin-docs.vercel.app/)
 
 # Links 
 
-- [Documentation](https://docs.rinbot.live)
-- [Website](https://rinbot.live)
+- [Documentation](https://rin-docs.vercel.app/)
+- [Website](https://rin-dbot.vercel.app/)
 
 ## Bot Discovery Network Links
 
 - [Top.gg](https://top.gg/bot/865883525932253184)
 - [Discords.com](https://discords.com/bots/bot/865883525932253184)
-- [Discord.bots.gg](https://discord.bots.gg/bots/865883525932253184) (Unverified)
+- [Discord.bots.gg](https://discord.bots.gg/bots/865883525932253184)
 - [Discord Labs](https://bots.discordlabs.org/bot/865883525932253184) (Unverified)
 
 [![Top.gg](https://top.gg/api/widget/865883525932253184.svg)](https://top.gg/bot/865883525932253184)

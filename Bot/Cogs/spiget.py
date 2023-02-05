@@ -8,6 +8,7 @@ import simdjson
 import uvloop
 from discord.commands import Option, SlashCommandGroup
 from discord.ext import commands, pages
+from discord.utils import format_dt
 from rin_exceptions import NoItemsError
 
 parser = simdjson.Parser()
@@ -64,16 +65,16 @@ class Spigot(commands.Cog):
                                 )
                                 .add_field(
                                     name="Release Date",
-                                    value=datetime.fromtimestamp(
-                                        mainItem["releaseDate"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    value=format_dt(
+                                        datetime.fromtimestamp(mainItem["releaseDate"])
+                                    ),
                                     inline=True,
                                 )
                                 .add_field(
                                     name="Last Updated",
-                                    value=datetime.fromtimestamp(
-                                        mainItem["updateDate"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    value=format_dt(
+                                        datetime.fromtimestamp(mainItem["updateDate"])
+                                    ),
                                     inline=True,
                                 )
                                 .add_field(

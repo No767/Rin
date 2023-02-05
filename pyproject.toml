@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "Rin"
+version = "2.3.0"
+description = "A Discord bot focused on obtaining data from third-party services with lighting performance in mind"
+authors = ["No767 <73260931+No767@users.noreply.github.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0"
+py-cord = {extras = ["voice"], version = "^2.3.2"}
+python-dotenv = "^0.21.1"
+uvloop = "^0.17.0"
+aiodns = "^3.0.0"
+Brotli = "^1.0.9"
+orjson = "^3.8.5"
+pysimdjson = "^5.0.2"
+asyncpraw = "^7.6.1"
+gql = {extras = ["aiohttp"], version = "^3.4.0"}
+rin-exceptions = "^1.0.3"
+numpy = "^1.24.1"
+ciso8601 = "^2.3.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^2.21.0"
+
+
+[tool.poetry.group.db.dependencies]
+tortoise-orm = "^0.19.3"
+asyncpg = "^0.27.0"
+
+
+[tool.isort]
+profile = 'black'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

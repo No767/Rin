@@ -1,13 +1,15 @@
 import asyncio
+from typing import Dict, List
 
 import aiohttp
+import ciso8601
 import discord
 import orjson
 import simdjson
 import uvloop
-from dateutil import parser
 from discord.commands import Option, SlashCommandGroup
 from discord.ext import commands, pages
+from discord.utils import format_dt
 from rin_exceptions import NoItemsError
 
 jsonParser = simdjson.Parser()
@@ -19,6 +21,140 @@ class List(list):
 
     def __getitem__(self, id):
         return super().__getitem__(id - 1)
+
+
+def formatMangaTitles(titles: Dict) -> List:
+    return titles["en"] if "en" in titles else [v for _, v in titles.items()]
+
+
+def formatAltTitles(titles: List) -> List:
+    for items in titles:
+        if "en" in items:
+            return [items["en"]]
+        else:
+            return [v for _, v in items.items()]
+
+
+def formatMangaDescriptions(descriptions: Dict) -> List:
+    return (
+        descriptions["en"]
+        if "en" in descriptions
+        else [v for _, v in descriptions["description"].items()]
+    )
+
+
+def formatTags(tags: Dict) -> List:
+    return (
+        tags["en"]
+        if "en" in tags
+        else ", ".join([v for _, v in tags["name"].items()]).rstrip(", ")
+    )
+
+
+class ChapterSelection(discord.ui.Select):
+    def __init__(self, chapters: List):
+        super().__init__(
+            placeholder="Choose a chapter",
+            options=[
+                discord.SelectOption(
+                    label=f"Chapter {items['chapter']} - {items['title']}",
+                    value=items["chapter"],
+                    description=items["scanlationGroups"],
+                )
+                for items in chapters
+            ],
+        )
+        self.chapters = chapters
+        self.isFirst = True
+        self.currMessage = None
+
+    async def callback(self, interaction: discord.Interaction):
+        currIndex = int(self.values[0]) - 1
+        chapterID = self.chapters[currIndex]["id"]
+        async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
+            async with session.get(
+                f"https://api.mangadex.org/at-home/server/{chapterID}"
+            ) as r:
+                data = await r.content.read()
+                dataMain = jsonParser.parse(data, recursive=True)
+                chapterHash = dataMain["chapter"]["hash"]
+                chapterPages = [
+                    discord.Embed(
+                        title=f"Chapter {self.values[0]} - {self.chapters[currIndex]['title']}"
+                    )
+                    .set_image(
+                        url=f"https://uploads.mangadex.org/data/{chapterHash}/{items}"
+                    )
+                    .set_footer(text="Chapters provided by MangaDex")
+                    for items in dataMain["chapter"]["data"]
+                ]
+                mainPages = pages.Paginator(pages=chapterPages)
+                if self.isFirst is True:
+                    self.isFirst = False
+                    self.currMessage = await mainPages.respond(interaction)
+                else:
+                    await self.currMessage.delete()
+                    self.currMessage = await mainPages.respond(interaction)
+
+
+class SelectMangaRead(discord.ui.View):
+    async def on_timeout(self):
+        for child in self.children:
+            child.disabled = True
+
+    def __init__(self, mangaData: Dict, currPageNum: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.mangaData = mangaData
+        self.currPageNum = currPageNum
+
+    def setCurrPageNum(self, pageNum: int):
+        self.currPageNum = pageNum
+
+    @discord.ui.button(
+        label="Select",
+        row=1,
+        style=discord.ButtonStyle.primary,
+        emoji=discord.PartialEmoji.from_str("<:check:314349398811475968>"),
+    )
+    async def callback(self, button, interaction: discord.Interaction) -> None:
+        async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
+            params = {
+                "contentRating[]": ["safe"],
+                "translatedLanguage[]": ["en"],
+                "order[chapter]": "asc",
+                "includes[]": ["scanlation_group"],
+            }
+            mangaID = self.mangaData[self.currPageNum]["id"]
+            mangaName = formatMangaTitles(
+                self.mangaData[self.currPageNum]["attributes"]["title"]
+            )
+            async with session.get(
+                f"https://api.mangadex.org/manga/{mangaID}/feed", params=params
+            ) as r:
+                data = await r.content.read()
+                dataMain = jsonParser.parse(data, recursive=True)
+                newDict = [
+                    {
+                        "id": item["id"],
+                        "chapter": item["attributes"]["chapter"],
+                        "title": item["attributes"]["title"],
+                        "volume": item["attributes"]["volume"],
+                        "scanlationGroups": str(
+                            [
+                                subItems["attributes"]["name"]
+                                for subItems in item["relationships"]
+                                if subItems["type"] == "scanlation_group"
+                            ]
+                        ).replace("'", "")[1:-1],
+                    }
+                    for item in dataMain["data"]
+                ][:25]
+                await interaction.response.edit_message(
+                    embed=discord.Embed(
+                        description=f"Please select a chapter from **{mangaName}**"  # nosec B608
+                    ),
+                    view=discord.ui.View(ChapterSelection(chapters=newDict)),
+                )
 
 
 class MangaDex(commands.Cog):
@@ -34,16 +170,16 @@ class MangaDex(commands.Cog):
     )
 
     @mdSearch.command(name="manga")
-    async def manga(self, ctx, *, manga: Option(str, "Name of Manga")):
-        """Searches for up to 25 manga on MangaDex"""
+    async def relatedManga(self, ctx, name: Option(str, "Name of manga")):
+        """Search for manga on MangaDex"""
         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
             params = {
-                "title": manga,
+                "title": name,
                 "publicationDemographic[]": "none",
                 "contentRating[]": "safe",
                 "order[title]": "asc",
                 "limit": 25,
-                "includes[]": "cover_art",
+                "includes[]": ["cover_art", "manga", "tags", "author"],
             }
             async with session.get(
                 f"https://api.mangadex.org/manga/", params=params
@@ -51,121 +187,162 @@ class MangaDex(commands.Cog):
                 data = await r.content.read()
                 dataMain = jsonParser.parse(data, recursive=True)
                 try:
-                    if len(dataMain["data"]) == 0:
-                        raise NoItemsError
-                    else:
-                        mainPages = pages.Paginator(
+                    mainPageGroups = [
+                        pages.PageGroup(
                             pages=[
                                 discord.Embed(
-                                    title=mainItem["attributes"]["title"]["en"]
-                                    if "en" in mainItem["attributes"]["title"]
-                                    else mainItem["attributes"]["title"],
-                                    description=mainItem["attributes"]["description"][
-                                        "en"
-                                    ]
-                                    if "en" in mainItem["attributes"]["description"]
-                                    else mainItem["attributes"]["description"],
-                                )
-                                .add_field(
-                                    name="Original Language",
-                                    value=f'[{mainItem["attributes"]["originalLanguage"]}]',
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Last Volume",
-                                    value=f'[{mainItem["attributes"]["lastVolume"]}]',
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Last Chapter",
-                                    value=f'[{mainItem["attributes"]["lastChapter"]}]',
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Status",
-                                    value=f'[{mainItem["attributes"]["status"]}]',
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Year",
-                                    value=f'[{mainItem["attributes"]["year"]}]',
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Content Rating",
-                                    value=f'[{mainItem["attributes"]["contentRating"]}]',
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Created At",
-                                    value=parser.isoparse(
-                                        mainItem["attributes"]["createdAt"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Last Updated At",
-                                    value=parser.isoparse(
-                                        mainItem["attributes"]["updatedAt"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
-                                    inline=True,
-                                )
-                                .add_field(
-                                    name="Available Translated Language",
-                                    value=f'{mainItem["attributes"]["availableTranslatedLanguages"]}'.replace(
-                                        "'", ""
+                                    title=formatMangaTitles(
+                                        items["attributes"]["title"]
                                     ),
-                                    inline=True,
+                                    description=formatMangaDescriptions(
+                                        items["attributes"]["description"]
+                                    ),
+                                )
+                                .add_field(
+                                    name="Alt Titles",
+                                    value=formatAltTitles(
+                                        items["attributes"]["altTitles"]
+                                    ),
                                 )
                                 .add_field(
                                     name="Tags",
-                                    value=str(
-                                        [
-                                            str(
-                                                [
-                                                    val
-                                                    for _, val in items["attributes"][
-                                                        "name"
-                                                    ].items()
-                                                ]
-                                            )
-                                            .replace("[", "")
-                                            .replace("]", "")
-                                            .replace("'", "")
-                                            for items in mainItem["attributes"]["tags"]
-                                        ]
-                                    ).replace("'", ""),
-                                    inline=True,
+                                    value=[
+                                        formatTags(tags["attributes"]["name"])
+                                        for tags in items["attributes"]["tags"]
+                                    ],
                                 )
                                 .add_field(
-                                    name="MangaDex URL",
-                                    value=f'https://mangadex.org/title/{mainItem["id"]}',
-                                    inline=True,
+                                    name="Status", value=items["attributes"]["status"]
+                                )
+                                .add_field(
+                                    name="Year", value=items["attributes"]["year"]
+                                )
+                                .add_field(
+                                    name="Created At",
+                                    value=format_dt(
+                                        ciso8601.parse_datetime(
+                                            items["attributes"]["createdAt"]
+                                        )
+                                    ),
+                                )
+                                .add_field(
+                                    name="Updated At",
+                                    value=format_dt(
+                                        ciso8601.parse_datetime(
+                                            items["attributes"]["updatedAt"]
+                                        )
+                                    ),
                                 )
                                 .set_image(
-                                    url=str(
-                                        [
-                                            f'https://uploads.mangadex.org/covers/{mainItem["id"]}/{items["attributes"]["fileName"]}'
-                                            for items in mainItem["relationships"]
-                                            if items["type"]
-                                            not in ["manga", "author", "artist"]
-                                        ]
-                                    )
-                                    .replace("'", "")
-                                    .replace("[", "")
-                                    .replace("]", "")
+                                    url=[
+                                        f'https://uploads.mangadex.org/covers/{items["id"]}/{subItems["attributes"]["fileName"]}'
+                                        for subItems in items["relationships"]
+                                        if subItems["type"] == "cover_art"
+                                    ][0]
                                 )
-                                for mainItem in dataMain["data"]
+                                for items in dataMain["data"]
                             ],
-                            loop_pages=True,
-                        )
-                        await mainPages.respond(ctx.interaction, ephemeral=False)
+                            label="Manga",
+                            description="View the results of your search",
+                        ),
+                        pages.PageGroup(
+                            pages=[
+                                [
+                                    discord.Embed(
+                                        title=formatMangaTitles(
+                                            subItems["attributes"]["title"]
+                                        ),
+                                        description=formatMangaDescriptions(
+                                            subItems["attributes"]["description"]
+                                        ),
+                                    )
+                                    .add_field(
+                                        name="Alt Titles",
+                                        value=", ".join(
+                                            formatAltTitles(
+                                                subItems["attributes"]["altTitles"]
+                                            )
+                                        ),
+                                    )
+                                    .add_field(
+                                        name="Tags",
+                                        value=[
+                                            formatTags(tags["attributes"]["name"])
+                                            for tags in subItems["attributes"]["tags"]
+                                        ],
+                                    )
+                                    .add_field(
+                                        name="Status",
+                                        value=subItems["attributes"]["status"],
+                                    )
+                                    .add_field(
+                                        name="MangaDex URL",
+                                        value=f"https://mangadex.org/title/{items['id']}",
+                                    )
+                                    .add_field(
+                                        name="Created At",
+                                        value=format_dt(
+                                            ciso8601.parse_datetime(
+                                                subItems["attributes"]["createdAt"]
+                                            )
+                                        ),
+                                    )
+                                    .add_field(
+                                        name="Updated At",
+                                        value=format_dt(
+                                            ciso8601.parse_datetime(
+                                                subItems["attributes"]["updatedAt"]
+                                            )
+                                        ),
+                                    )
+                                    for subItems in items["relationships"]
+                                    if subItems["type"] == "manga"
+                                ][:3]
+                                for items in dataMain["data"]
+                            ],
+                            label="Related Manga",
+                            description="View related manga",
+                        ),
+                        pages.PageGroup(
+                            pages=[
+                                [
+                                    discord.Embed(
+                                        title=subItems["attributes"]["name"],
+                                        description=subItems["attributes"]["biography"],
+                                    )
+                                    .add_field(
+                                        name="Twitter",
+                                        value=subItems["attributes"]["twitter"]
+                                        if subItems["attributes"]["twitter"] is not None
+                                        else "None",
+                                    )
+                                    .add_field(
+                                        name="Pixiv",
+                                        value=subItems["attributes"]["pixiv"]
+                                        if subItems["attributes"]["pixiv"] is not None
+                                        else "None",
+                                    )
+                                    .add_field(
+                                        name="YouTube",
+                                        value=subItems["attributes"]["youtube"]
+                                        if subItems["attributes"]["youtube"] is not None
+                                        else "None",
+                                    )
+                                    for subItems in items["relationships"]
+                                    if subItems["type"] == "author"
+                                ]
+                                for items in dataMain["data"]
+                            ],
+                            label="Author",
+                            description="View the author of the manga(s)",
+                        ),
+                    ]
+                    mainPages = pages.Paginator(pages=mainPageGroups, show_menu=True)
+                    await mainPages.respond(ctx.interaction, ephemeral=False)
                 except NoItemsError:
                     embedErrorAlt2 = discord.Embed()
                     embedErrorAlt2.description = "Sorry, but the manga you searched for does not exist or is invalid. Please try again."
                     await ctx.respond(embed=embedErrorAlt2)
-
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
     @md.command(name="random")
     async def manga_random(self, ctx):
@@ -342,16 +519,20 @@ class MangaDex(commands.Cog):
                                 )
                                 .add_field(
                                     name="Created At",
-                                    value=parser.isoparse(
-                                        mainItem["attributes"]["createdAt"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    value=format_dt(
+                                        ciso8601.parse_datetime(
+                                            mainItem["attributes"]["createdAt"]
+                                        )
+                                    ),
                                     inline=True,
                                 )
                                 .add_field(
                                     name="Updated At",
-                                    value=parser.isoparse(
-                                        mainItem["attributes"]["updatedAt"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    value=format_dt(
+                                        ciso8601.parse_datetime(
+                                            mainItem["attributes"]["updatedAt"]
+                                        )
+                                    ),
                                     inline=True,
                                 )
                                 for mainItem in mdDataMain["data"]
@@ -390,16 +571,20 @@ class MangaDex(commands.Cog):
                                 )
                                 .add_field(
                                     name="Created At",
-                                    value=parser.isoparse(
-                                        mainItem["attributes"]["createdAt"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    value=format_dt(
+                                        ciso8601.parse_datetime(
+                                            mainItem["attributes"]["createdAt"]
+                                        )
+                                    ),
                                     inline=True,
                                 )
                                 .add_field(
                                     name="Updated At",
-                                    value=parser.isoparse(
-                                        mainItem["attributes"]["updatedAt"]
-                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    value=format_dt(
+                                        ciso8601.parse_datetime(
+                                            mainItem["attributes"]["updatedAt"]
+                                        )
+                                    ),
                                     inline=True,
                                 )
                                 .add_field(
@@ -442,78 +627,89 @@ class MangaDex(commands.Cog):
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-    # This will be disabled on production releases, since
-    # this requires an ID input, and is not finished yet.
-    # discord labs would definitely complain about this command...
+    # Mostly finished, but not production ready
+    # This will probably get deployed in v2.4.x instead of v2.3.x
 
     # @md.command(name="read")
     # async def manga_read(
     #     self,
-    #     ctx,
-    #     *,
-    #     manga_id: Option(str, "The Manga's ID"),
-    #     chapter_number: Option(int, "The chapter number of the manga"),
+    #     ctx: discord.ApplicationContext,
+    #     name: Option(str, "The name of the manga"),
     # ):
     #     """Reads a chapter out of the manga provided on MangaDex"""
-    #     try:
-    #         async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-    #             params = {
-    #                 "contentRating[]": "safe",
-    #                 "includeFutureUpdates": 1,
-    #                 "order[createdAt]": "asc",
-    #                 "order[updatedAt]": "asc",
-    #                 "order[publishAt]": "asc",
-    #                 "order[readableAt]": "asc",
-    #                 "order[volume]": "asc",
-    #                 "order[chapter]": "asc",
-    #             }
-    #             async with session.get(
-    #                 f"https://api.mangadex.org/manga/{manga_id}/feed", params=params
-    #             ) as r:
-    #                 data = await r.content.read()
-    #                 dataMain = jsonParser.parse(data, recursive=True)
-    #                 if "error" in dataMain["result"]:
-    #                     raise NotFoundHTTPException
-    #                 else:
-    #                     chapterIndexID = List(dataMain["data"])[chapter_number]["id"]
-    #                     chapterTitle = List(dataMain["data"])[chapter_number][
-    #                         "attributes"
-    #                     ]["title"]
-    #                     chapterPos = List(dataMain["data"])[chapter_number][
-    #                         "attributes"
-    #                     ]["chapter"]
-    #                     async with aiohttp.ClientSession(
-    #                         json_serialize=orjson.dumps
-    #                     ) as session:
-    #                         async with session.get(
-    #                             f"https://api.mangadex.org/at-home/server/{chapterIndexID}"
-    #                         ) as r:
-    #                             data2 = await r.content.read()
-    #                             dataMain2 = jsonParser.parse(data2, recursive=True)
-    #                             if "error" in dataMain2["result"]:
-    #                                 raise NotFoundHTTPException
-    #                             else:
-    #                                 chapter_hash = dataMain2["chapter"]["hash"]
-    #                                 paginator = pages.Paginator(
-    #                                     pages=[
-    #                                         discord.Embed()
-    #                                         .set_footer(
-    #                                             text=f"{chapterTitle} - Chapter {chapterPos}"
-    #                                         )
-    #                                         .set_image(
-    #                                             url=f"https://uploads.mangadex.org/data/{chapter_hash}/{item}"
-    #                                         )
-    #                                         for item in dataMain2["chapter"]["data"]
-    #                                     ],
-    #                                     loop_pages=True,
-    #                                 )
-    #                                 await paginator.respond(
-    #                                     ctx.interaction, ephemeral=False
-    #                                 )
-    #     except NotFoundHTTPException:
-    #         embedError = discord.Embed()
-    #         embedError.description = "It seems like the manga's id is invalid or cannot be found. Please try again"
-    #         await ctx.respond(embed=embedError)
+    #     async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
+    #         params = {
+    #             "title": name,
+    #             "publicationDemographic[]": "none",
+    #             "contentRating[]": "safe",
+    #             "order[title]": "asc",
+    #             "limit": 25,
+    #             "includes[]": ["cover_art", "tags", "author"],
+    #         }
+    #         async with session.get(
+    #             f"https://api.mangadex.org/manga/", params=params
+    #         ) as r:
+    #             data = await r.content.read()
+    #             dataMain = jsonParser.parse(data, recursive=True)
+    #             mainPages = pages.Paginator(
+    #                 pages=[
+    #                     discord.Embed(
+    #                         title=formatMangaTitles(items["attributes"]["title"]),
+    #                         description=formatMangaDescriptions(
+    #                             items["attributes"]["description"]
+    #                         ),
+    #                     )
+    #                     .add_field(
+    #                         name="Alt Titles",
+    #                         value=formatAltTitles(items["attributes"]["altTitles"]),
+    #                     )
+    #                     .add_field(
+    #                         name="Author",
+    #                         value=[
+    #                             subItems["attributes"]["name"]
+    #                             for subItems in items["relationships"]
+    #                             if subItems["type"] == "author"
+    #                         ],
+    #                     )
+    #                     .add_field(
+    #                         name="Tags",
+    #                         value=[
+    #                             formatTags(tags["attributes"]["name"])
+    #                             for tags in items["attributes"]["tags"]
+    #                         ],
+    #                     )
+    #                     .add_field(name="Status", value=items["attributes"]["status"])
+    #                     .add_field(
+    #                         name="Created At",
+    #                         value=format_dt(
+    #                             ciso8601.parse_datetime(
+    #                                 items["attributes"]["createdAt"]
+    #                             )
+    #                         ),
+    #                     )
+    #                     .add_field(
+    #                         name="Updated At",
+    #                         value=format_dt(
+    #                             ciso8601.parse_datetime(
+    #                                 items["attributes"]["updatedAt"]
+    #                             )
+    #                         ),
+    #                     )
+    #                     .set_image(
+    #                         url=[
+    #                             f'https://uploads.mangadex.org/covers/{items["id"]}/{subItems["attributes"]["fileName"]}'
+    #                             for subItems in items["relationships"]
+    #                             if subItems["type"] == "cover_art"
+    #                         ][0]
+    #                     )
+    #                     for items in dataMain["data"]
+    #                 ],
+    #             )
+    #             # The current_pages one is bugged. it's always set to zero apparently
+    #             mainPages.custom_view = SelectMangaRead(
+    #                 mangaData=dataMain["data"], currPageNum=mainPages.current_page
+    #             )
+    #             await mainPages.respond(ctx.interaction)
 
 
 def setup(bot):
