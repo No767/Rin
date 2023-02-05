@@ -37,18 +37,13 @@ Rin builds to 2 different Docker Registries: GHCR (GitHub Container Registry) an
     ```
 2. Go ahead and get the access tokens and/or API keys for some of the APIs. Here's a list of the services that require API Keys or Access Tokens
     - [Blue Alliance](https://www.thebluealliance.com/apidocs)
-    - [Discord.bots.gg](https://discord.bots.gg/) (probably will have to log in first)
-    - [FIRST FRC](https://frc-events.firstinspires.org/services/API) 
     - [GitHub](https://docs.github.com/en/rest/guides/basics-of-authentication)
-    - [Hypixel](https://api.hypixel.net/#section/Authentication/ApiKey)
     - [Reddit](https://www.reddit.com/prefs/apps) (Get both the ID and Secret)
     - [Tenor](https://developers.google.com/tenor/guides/quickstart#setup)
-    - [Top.gg](https://docs.top.gg/)
-    - [Twitch](https://dev.twitch.tv/docs/api/get-started) (Get both the Access Token and Client ID. [Use an Implicit grant flow for this](https://dev.twitch.tv/docs/authentication/getting-tokens-oauth#implicit-grant-flow))
     - [Twitter](https://developer.twitter.com/en/docs/twitter-api/getting-started/about-twitter-api) (Get the Bearer Token that supports both API v2 and v1.1)
     - [YouTube](https://developers.google.com/youtube/registering_an_application)
 
-3. Go ahead and get the token for Rin. Save it instead, and this will be used to authorize the bot. Instructions can be found [here](https://github.com/No767/Rin/blob/dev/Community/getting-started-guide.md#getting-the-discord-bot).
+3. Go ahead and get the token for Rin. Save it instead, and this will be used to authorize the bot. Instructions can be found [here](getting-dev-discord-bot.md).
 
 4. Download the example docker env file. You'll put your API keys, bot tokens, and access tokens inside there. 
 
@@ -100,18 +95,13 @@ Rin builds to 2 different Docker Registries: GHCR (GitHub Container Registry) an
 
 2. Go ahead and get the access tokens and/or API keys for some of the APIs. Here's a list of the services that require API Keys or Access Tokens
     - [Blue Alliance](https://www.thebluealliance.com/apidocs)
-    - [Discord.bots.gg](https://discord.bots.gg/) (probably will have to log in first)
-    - [FIRST FRC](https://frc-events.firstinspires.org/services/API) 
     - [GitHub](https://docs.github.com/en/rest/guides/basics-of-authentication)
-    - [Hypixel](https://api.hypixel.net/#section/Authentication/ApiKey)
     - [Reddit](https://www.reddit.com/prefs/apps) (Get both the ID and Secret)
     - [Tenor](https://developers.google.com/tenor/guides/quickstart#setup)
-    - [Top.gg](https://docs.top.gg/)
-    - [Twitch](https://dev.twitch.tv/docs/api/get-started) (Get both the Access Token and Client ID. [Use an Implicit grant flow for this](https://dev.twitch.tv/docs/authentication/getting-tokens-oauth#implicit-grant-flow))
     - [Twitter](https://developer.twitter.com/en/docs/twitter-api/getting-started/about-twitter-api) (Get the Bearer Token that supports both API v2 and v1.1)
-    - [YouTube](https://developers.google.com/youtube/registering_an_application)
+    - [YouTube](https://developers.google.com/youtube/registering_an_application) 
 
-3. Go ahead and get the token for Rin. Save it instead, and this will be used to authorize the bot. Instructions can be found [here](https://github.com/No767/Rin/blob/dev/Community/getting-started-guide.md#getting-the-discord-bot).
+3. Go ahead and get the token for Rin. Save it instead, and this will be used to authorize the bot. Instructions can be found [here](getting-dev-discord-bot.md).
 
 4. Invite your bot into your server of choice
 
@@ -136,48 +126,6 @@ Rin builds to 2 different Docker Registries: GHCR (GitHub Container Registry) an
 > If you are using Windows, then you don't need to use `sudo` with the commands.
 
 7. (Optional) Check the logs of the docker container to make sure that you are not missing anything
-
-
-## Getting the Discord Bot
-
-You'll more than likely need to get your discord bot up. So these are the setups to how to do that
-
-![images](../assets/getting-started-assets/create-app.png)
-
-1. Create the app that will be needed for the bot. Once done, you should see the page as shown above
-
-![yesyes](../assets/getting-started-assets/create-bot.png)
-
-2. Now head done to the bot section, and click on the button that says "Add Bot". 
-
-![ewom](../assets/getting-started-assets/allow-bot.png)
-
-3. You'll see a pop-up that asks you if you want to create the bot. 
-
-![intents](../assets/getting-started-assets/allow-intents.png)
-
-4. Make sure to have all 3 of the buttons enabled. Rin will need all 3 of them to work.
-
-![whyyy](../assets/getting-started-assets/reset-token.png)
-
-5. You'll see a page just like the one above. We'll need access the the token for the bot, and the only way to do it is to reset the token.
-
-![confirm](../assets/getting-started-assets/allow-reset-token.png)
-
-6. Allow for the token to be reset. Note that if your account is hooked up with 2FA, it will ask you to enter your 2FA code. Go to your authenticator app and enter the code from the app.
-
-![copytoken](../assets/getting-started-assets/copy-token.png)
-
-7. Now click on the copy button and copy the token
-
-8. Now head back the to the docker run command, and switch out the env vars as needed (replace `...` with your discord bot token):
-
-  ```sh
-  TOKEN=...
-  ```
-
-  > **Note**
-  > On dev builds, also add the `TESTING_BOT_TOKEN` env var and use the same exact token for that instead. It'll read it off of that instead
 
 ## Extra Notes
 
