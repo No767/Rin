@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
 py-cord = {extras = ["voice"], version = "^2.4.0"}
-python-dotenv = "^0.21.1"
+python-dotenv = "^1.0.0"
 uvloop = "^0.17.0"
 aiodns = "^3.0.0"
 Brotli = "^1.0.9"
