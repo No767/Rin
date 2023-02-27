@@ -15,7 +15,7 @@ aiodns = "^3.0.0"
 Brotli = "^1.0.9"
 orjson = "^3.8.6"
 pysimdjson = "^5.0.2"
-asyncpraw = "^7.6.1"
+asyncpraw = "^7.7.0"
 gql = {extras = ["aiohttp"], version = "^3.4.0"}
 rin-exceptions = "^1.0.3"
 numpy = "^1.24.2"
