@@ -4,7 +4,7 @@ on:
     types:
       - opened
   workflow_run:
-    workflows: ["Analyze"]
+    workflows: ["CodeQL"]
     branches: [dev]
     types: 
       - completed
