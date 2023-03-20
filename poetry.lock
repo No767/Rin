@@ -1021,14 +1021,14 @@ virtualenv = ">=20.10.0"
 
 [[package]]
 name = "py-cord"
-version = "2.4.0"
+version = "2.4.1"
 description = "A Python wrapper for the Discord API"
 category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "py-cord-2.4.0.tar.gz", hash = "sha256:2f35d92555ace5573b6349e010b4ad202603be0ab9f8afbc1d91b9cd1f203694"},
-    {file = "py_cord-2.4.0-py3-none-any.whl", hash = "sha256:2f81dcc3c8b06d7470a90a39b0245d85285ff4170c53720f28d494848d5d8dd5"},
+    {file = "py-cord-2.4.1.tar.gz", hash = "sha256:0266c9d9a9d2397622a0e5ead09826690e688ba3cf14c470167b81e6cd2d8a56"},
+    {file = "py_cord-2.4.1-py3-none-any.whl", hash = "sha256:862a372c364cd263e2c8e696c64887f969c02cbdf0fdd6b09f0283e9dd67a290"},
 ]
 
 [package.dependencies]
@@ -1605,4 +1605,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4.0"
-content-hash = "fe97af2ddb0089210dd37a9299d1f6249699cbba3ed95f43185898503ebce094"
+content-hash = "9e7140fd6019230779e073fff3cc78f95af8429903bafffadc59c56c20847e3f"
