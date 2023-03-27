@@ -23,7 +23,7 @@ ciso8601 = "^2.3.0"
 
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^3.2.0"
+pre-commit = "^3.2.1"
 
 
 [tool.poetry.group.db.dependencies]
