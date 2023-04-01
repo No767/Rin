@@ -8,7 +8,7 @@ from rincore import RinCore
 
 load_dotenv()
 
-TOKEN = os.getenv("TOKEN")
+TOKEN = os.getenv("Hanako_Token")
 intents = discord.Intents.default()
 intents.message_content = True
 
