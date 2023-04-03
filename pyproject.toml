@@ -24,7 +24,7 @@ better-ipc = "^2.0.3"
 
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^3.2.1"
+pre-commit = "^3.2.2"
 
 
 [tool.poetry.group.db.dependencies]
