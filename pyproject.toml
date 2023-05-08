@@ -16,7 +16,7 @@ Brotli = "^1.0.9"
 orjson = "^3.8.11"
 pysimdjson = "^5.0.2"
 asyncpraw = "^7.7.0"
-gql = {extras = ["aiohttp"], version = "^3.4.0"}
+gql = {extras = ["aiohttp"], version = "^3.4.1"}
 rin-exceptions = "^1.0.3"
 numpy = "^1.24.3"
 ciso8601 = "^2.3.0"
