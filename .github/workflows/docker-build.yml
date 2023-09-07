@@ -49,7 +49,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Docker layers
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-ghcr-debian-${{ github.sha }}
@@ -108,7 +108,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Cache Docker layers
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-hub-debian-${{ github.sha }}
